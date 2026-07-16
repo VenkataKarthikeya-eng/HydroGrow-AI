@@ -1,0 +1,93 @@
+{
+  "crop": "Lettuce (Lactuca sativa)",
+  "optimal_ranges": {
+    "water_ph": {
+      "min": 5.5,
+      "max": 6.5,
+      "explanation": "Optimal pH range for nutrient availability. Outside this range leads to nutrient lockout (e.g., iron lockout above 6.5, calcium lockout below 5.5)."
+    },
+    "water_ec": {
+      "min": 1.2,
+      "max": 2.5,
+      "unit": "mS/cm",
+      "explanation": "Ensures adequate nutrient concentration for vegetative growth. Under 1.2 mS/cm causes underfeeding; over 2.5 mS/cm causes osmotic stress and tip burn."
+    },
+    "air_temperature": {
+      "min": 18.0,
+      "max": 24.0,
+      "unit": "°C",
+      "explanation": "Promotes active plant metabolism. Cold air slows growth; warm air causes bolting (flowering) and bitterness."
+    },
+    "humidity": {
+      "min": 50.0,
+      "max": 70.0,
+      "unit": "%",
+      "explanation": "Controls plant transpiration. Low humidity closes stomata; high humidity blocks calcium transport (tip burn) and invites fungal disease."
+    },
+    "co2": {
+      "min": 400.0,
+      "max": 800.0,
+      "unit": "ppm",
+      "explanation": "Essential for carbon fixation. Higher CO2 accelerates photosynthesis, while depletion (< 300 ppm) stalls growth."
+    },
+    "water_temperature": {
+      "min": 18.0,
+      "max": 24.0,
+      "unit": "°C",
+      "explanation": "Balances root metabolic activity with dissolved oxygen. Warm water suffocates roots and breeds Pythium (root rot)."
+    }
+  },
+  "nutrient_guidelines": {
+    "mixing": "Use a balanced hydroponic A/B formula formulated for leafy greens. Mix stock solution A into water thoroughly before adding B to prevent precipitation of calcium phosphate.",
+    "replenishment": "Check EC levels daily. Top up the reservoir with fresh water if EC increases (due to high evaporation), or add nutrient concentrate if EC drops below 1.2 mS/cm.",
+    "ph_calibration": "Calibrate pH probes weekly. Add pH-down (phosphoric acid) or pH-up (potassium hydroxide) in small increments to adjust pH."
+  },
+  "common_problems": [
+    {
+      "name": "Tip Burn",
+      "symptom": "Dry, brown leaf margins on new growing leaves.",
+      "cause": "Calcium deficiency in growing tips, usually caused by poor transpiration (high humidity, high water temp, or high EC) rather than lack of calcium in solution.",
+      "solution": "Reduce humidity to 50-60%, lower EC under 2.0 mS/cm, increase airflow with vertical circulating fans, and maintain water temp below 24°C."
+    },
+    {
+      "name": "Bolting",
+      "symptom": "Lettuce plants stretch vertically, form a central flower stem, and leaves turn bitter.",
+      "cause": "Heat stress (air temperature above 25°C) or long photo-periods.",
+      "solution": "Maintain air temperatures under 24°C, use shade clothes during hot days, harvest early if bolting begins, and select bolt-resistant cultivars."
+    },
+    {
+      "name": "Root Rot (Pythium)",
+      "symptom": "Roots turn brown, slimy, smell bad, and plant wilts during warm periods.",
+      "cause": "Water temperature above 24°C, leading to low dissolved oxygen and proliferation of Pythium fungus.",
+      "solution": "Lower water temperature under 22°C using a water chiller or reservoir insulation. Add beneficial microbes (Bacillus amyloliquefaciens) or dose with hydrogen peroxide."
+    },
+    {
+      "name": "Algae Growth",
+      "symptom": "Green slime on grow channels, net pots, or reservoir walls.",
+      "cause": "Light exposing nutrient-rich water.",
+      "solution": "Block all light entry to the reservoir and grow channels. Use opaque covers, black-out vinyl, or grow media covers."
+    }
+  ],
+  "growth_stages": [
+    {
+      "stage": "Germination",
+      "duration": "2-3 days",
+      "conditions": "Dark, moist grow plug. Keep humidity high and temperature around 20-22°C."
+    },
+    {
+      "stage": "Nursery Stage",
+      "duration": "10-14 days",
+      "conditions": "Seedlings under grow lights. Provide low-strength nutrients (EC 0.8-1.0 mS/cm), maintaining pH at 5.8-6.2."
+    },
+    {
+      "stage": "Vegetative Phase",
+      "duration": "21-28 days",
+      "conditions": "Active growth after transplant into channels. Maintain EC at 1.2-2.0 mS/cm, pH 5.8-6.2, CO2 400-800 ppm, and humidity 55-65%."
+    },
+    {
+      "stage": "Harvest Stage",
+      "duration": "Ready at 35-45 days total",
+      "conditions": "Lettuce weight reaches 250g-350g. Flush system with fresh water for 24-48 hours if a cleaner taste is preferred."
+    }
+  ]
+}

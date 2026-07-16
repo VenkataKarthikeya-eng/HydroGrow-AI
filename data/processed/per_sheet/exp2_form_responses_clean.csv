@@ -1,0 +1,8 @@
+experiment,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+Experiment 2,,,,,,,,,,,,,,,R2,,,,,,,,,,
+Experiment 2,Timestamp,,Gender,Smell (الرائحة),,,,,Bitter (المرارة),,,,Overall evaluation (The best),Comments,Smell (الرائحة),,,,Sweetness (الحلاوة ),Bitter (المرارة),,After taste (المذاق الأخير),Acceptance,,Comments
+Experiment 2,2024-05-15 16:28:34.895000,22.0,Male,Fresh,9.0,8.0,9.0,,5 (Extremely Bitter ),5.0,9.0,9.0,10 (like extremely ),,Fresh,9.0,9.0,9.0,5 (Extremely sweet  ),5 (Extremely Bitter ),5.0,10 (like extremely ),10 (like extremely ),9.0,
+Experiment 2,2024-05-15 16:30:37.820000,26.0,Male,Normal,6.0,8.0,8.0,4.0,2,4.0,8.0,8.0,8,,Normal,9.0,9.0,9.0,5 (Extremely sweet  ),1 (Not at all bitter),4.0,10 (like extremely ),10 (like extremely ),,
+Experiment 2,2024-05-15 16:33:12.614000,31.0,Female,Normal,7.0,6.0,7.0,4.0,1 (Not at all bitter),4.0,8.0,8.0,8,,Normal,7.0,7.0,7.0,3,1 (Not at all bitter),4.0,7,7,7.0,
+Experiment 2,2024-05-15 16:33:33.060000,28.0,Male,Normal,6.0,6.0,5.0,3.0,3,3.0,5.0,6.0,6,,Normal,8.0,8.0,7.0,4,1 (Not at all bitter),4.0,7,8,8.0,
+Experiment 2,2024-05-15 17:12:17.188000,30.0,Male,Fresh,,9.0,8.0,4.0,1 (Not at all bitter),5.0,9.0,,10 (like extremely ),,Fresh,,7.0,9.0,3,2,5.0,8,9,8.0,

@@ -1,0 +1,6 @@
+experiment,replicate_1_t1,replicate_2_t1,replicate_3_t1,replicate_1_t2,replicate_2_t2,replicate_3_t2
+Experiment 1,10,0,0,0,0,100
+Experiment 1,10,10,10,10,15,10
+Experiment 1,0,0,0,0,0,16
+Experiment 1,15,15,15,15,15,15
+Experiment 1,35,25,25,25,30,141

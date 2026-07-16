@@ -1,0 +1,3 @@
+Column Name,Data Type,Missing Count,Missing Percentage,Unique Values,Sample Values,Description
+experiment,str,0,0.0,1,['Experiment 2'],"Experiment identifier (Experiment 1, 2, or 3)"
+date,datetime64[us],1,50.0,1,[Timestamp('2024-05-02 00:00:00')],Date of measurement

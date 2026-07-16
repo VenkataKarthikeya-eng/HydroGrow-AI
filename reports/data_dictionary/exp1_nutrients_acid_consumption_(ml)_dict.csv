@@ -1,0 +1,8 @@
+Column Name,Data Type,Missing Count,Missing Percentage,Unique Values,Sample Values,Description
+experiment,str,0,0.0,1,['Experiment 1'],"Experiment identifier (Experiment 1, 2, or 3)"
+replicate_1_t1,int64,0,0.0,4,"[20, 14, 5, 39]",
+replicate_2_t1,int64,0,0.0,4,"[20, 10, 5, 35]",
+replicate_3_t1,int64,0,0.0,4,"[20, 10, 5, 35]",
+replicate_1_t2,int64,0,0.0,4,"[20, 10, 5, 35]",
+replicate_2_t2,int64,0,0.0,4,"[20, 10, 5, 35]",
+replicate_3_t2,int64,0,0.0,4,"[20, 10, 5, 35]",

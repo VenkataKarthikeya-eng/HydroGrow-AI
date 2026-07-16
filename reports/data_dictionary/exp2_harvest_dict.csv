@@ -1,0 +1,14 @@
+Column Name,Data Type,Missing Count,Missing Percentage,Unique Values,Sample Values,Description
+experiment,str,0,0.0,1,['Experiment 2'],"Experiment identifier (Experiment 1, 2, or 3)"
+plant_no,float64,6,7.69,12,"[1.0, 2.0, 3.0, 4.0, 5.0]",Plant identification number within replicate
+total_weight_g,float64,0,0.0,65,"[317.0, 270.0, 311.0, 360.0, 326.0]",Total plant weight in grams
+plant_height_cm,float64,6,7.69,27,"[55.0, 50.0, 52.0, 70.0, 67.0]",Total plant height in centimeters
+shoot_length_cm,float64,6,7.69,13,"[15.0, 16.0, 14.0, 17.0, 19.0]",Shoot (above-root) length in centimeters
+root_length_cm,float64,6,7.69,35,"[40.0, 34.0, 38.0, 53.0, 48.0]",Root length in centimeters
+head_diameter_cm,str,6,7.69,37,"['25*26', '30*25', '29*30', '30*31', '27*30']",Head diameter in centimeters (often W*H format)
+stem_diameter_cm,float64,6,7.69,5,"[2.0, 2.5, 2.1, 1.8, 1.5]",Stem diameter in centimeters
+shoot_weight_before_removing_wilted_leaves_g,float64,6,7.69,54,"[272.0, 248.0, 292.0, 300.0, 227.0]",Shoot weight before removing wilted leaves (g)
+shoot_weight_after_removing_wilted_leavesg,float64,6,7.69,58,"[264.0, 239.0, 283.0, 293.0, 300.0]",Shoot weight after removing wilted leaves (g)
+root_weight_g,float64,6,7.69,30,"[45.0, 22.0, 19.0, 60.0, 26.0]",Root weight in grams
+no_of_leaves,float64,6,7.69,20,"[37.0, 29.0, 38.0, 34.0, 33.0]",Number of leaves counted
+system,str,0,0.0,6,"['R1-T1', 'R2-T1', 'R3-T1', 'R1-T2', 'R2-T2']","Replicate-Treatment system code (e.g., R1T1)"

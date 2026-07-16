@@ -1,0 +1,14 @@
+Column Name,Data Type,Missing Count,Missing Percentage,Unique Values,Sample Values,Description
+experiment,str,0,0.0,1,['Experiment 3'],"Experiment identifier (Experiment 1, 2, or 3)"
+replicate,str,0,0.0,1,['Replicate 1 T1'],Replicate/treatment system identifier
+date,datetime64[s],712,100.0,0,[],Date of measurement
+tme,str,712,100.0,0,[],Time of measurement
+ph,str,712,100.0,0,[],pH level of nutrient solution
+ec,str,712,100.0,0,[],Electrical conductivity (mS/cm)
+tds,str,712,100.0,0,[],Total dissolved solids (ppm)
+water_temp,str,712,100.0,0,[],Water temperature (°C)
+date_1,datetime64[us],0,0.0,32,"[Timestamp('2024-05-19 00:00:00'), Timestamp('2024-05-20 00:00:00'), Timestamp('2024-05-21 00:00:00'), Timestamp('2024-05-22 00:00:00'), Timestamp('2024-05-23 00:00:00')]",
+tme_1,str,0,0.0,24,"['17:00:00', '18:00:00', '19:00:00', '20:00:00', '21:00:00']",
+rh%,float64,0,0.0,595,"[51.62, 53.18, 54.38, 55.19, 57.2]",Relative humidity percentage
+air_temp,float64,0,0.0,501,"[24.81, 23.45, 24.87, 25.29, 25.28]",Air temperature (°C)
+co2,float64,0,0.0,679,"[415.25, 415.76, 424.68, 432.47, 435.42]",CO₂ concentration

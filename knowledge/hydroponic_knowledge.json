@@ -1,0 +1,184 @@
+{
+  "crop": "Lettuce (Lactuca sativa)",
+  "optimal_ranges": {
+    "water_ph": {
+      "min": 5.5,
+      "max": 6.5,
+      "explanation": "Optimal pH range for nutrient availability. Outside this range leads to nutrient lockout (e.g., iron lockout above 6.5, calcium lockout below 5.5)."
+    },
+    "water_ec": {
+      "min": 1.2,
+      "max": 2.5,
+      "unit": "mS/cm",
+      "explanation": "Ensures adequate nutrient concentration for vegetative growth. Under 1.2 mS/cm causes underfeeding; over 2.5 mS/cm causes osmotic stress and tip burn."
+    },
+    "air_temperature": {
+      "min": 18.0,
+      "max": 24.0,
+      "unit": "°C",
+      "explanation": "Promotes active plant metabolism. Cold air slows growth; warm air causes bolting (flowering) and bitterness."
+    },
+    "humidity": {
+      "min": 50.0,
+      "max": 70.0,
+      "unit": "%",
+      "explanation": "Controls plant transpiration. Low humidity closes stomata; high humidity blocks calcium transport (tip burn) and invites fungal disease."
+    },
+    "co2": {
+      "min": 400.0,
+      "max": 800.0,
+      "unit": "ppm",
+      "explanation": "Essential for carbon fixation. Higher CO2 accelerates photosynthesis, while depletion (< 300 ppm) stalls growth."
+    },
+    "water_temperature": {
+      "min": 18.0,
+      "max": 24.0,
+      "unit": "°C",
+      "explanation": "Balances root metabolic activity with dissolved oxygen. Warm water suffocates roots and breeds Pythium (root rot)."
+    }
+  },
+  "nutrient_guidelines": {
+    "mixing": "Use a balanced hydroponic A/B formula formulated for leafy greens. Mix stock solution A into water thoroughly before adding B to prevent precipitation of calcium phosphate.",
+    "replenishment": "Check EC levels daily. Top up the reservoir with fresh water if EC increases (due to high evaporation), or add nutrient concentrate if EC drops below 1.2 mS/cm.",
+    "ph_calibration": "Calibrate pH probes weekly. Add pH-down (phosphoric acid) or pH-up (potassium hydroxide) in small increments to adjust pH."
+  },
+  "common_problems": [
+    {
+      "name": "Tip Burn",
+      "symptom": "Dry, brown leaf margins on new growing leaves.",
+      "cause": "Calcium deficiency in growing tips, usually caused by poor transpiration (high humidity, high water temp, or high EC) rather than lack of calcium in solution.",
+      "solution": "Reduce humidity to 50-60%, lower EC under 2.0 mS/cm, increase airflow with vertical circulating fans, and maintain water temp below 24°C."
+    },
+    {
+      "name": "Bolting",
+      "symptom": "Lettuce plants stretch vertically, form a central flower stem, and leaves turn bitter.",
+      "cause": "Heat stress (air temperature above 25°C) or long photo-periods.",
+      "solution": "Maintain air temperatures under 24°C, use shade clothes during hot days, harvest early if bolting begins, and select bolt-resistant cultivars."
+    },
+    {
+      "name": "Root Rot (Pythium)",
+      "symptom": "Roots turn brown, slimy, smell bad, and plant wilts during warm periods.",
+      "cause": "Water temperature above 24°C, leading to low dissolved oxygen and proliferation of Pythium fungus.",
+      "solution": "Lower water temperature under 22°C using a water chiller or reservoir insulation. Add beneficial microbes (Bacillus amyloliquefaciens) or dose with hydrogen peroxide."
+    },
+    {
+      "name": "Algae Growth",
+      "symptom": "Green slime on grow channels, net pots, or reservoir walls.",
+      "cause": "Light exposing nutrient-rich water.",
+      "solution": "Block all light entry to the reservoir and grow channels. Use opaque covers, black-out vinyl, or grow media covers."
+    }
+  ],
+  "growth_stages": [
+    {
+      "stage": "Germination",
+      "duration": "2-3 days",
+      "conditions": "Dark, moist grow plug. Keep humidity high and temperature around 20-22°C."
+    },
+    {
+      "stage": "Nursery Stage",
+      "duration": "10-14 days",
+      "conditions": "Seedlings under grow lights. Provide low-strength nutrients (EC 0.8-1.0 mS/cm), maintaining pH at 5.8-6.2."
+    },
+    {
+      "stage": "Vegetative Phase",
+      "duration": "21-28 days",
+      "conditions": "Active growth after transplant into channels. Maintain EC at 1.2-2.0 mS/cm, pH 5.8-6.2, CO2 400-800 ppm, and humidity 55-65%."
+    },
+    {
+      "stage": "Harvest Stage",
+      "duration": "Ready at 35-45 days total",
+      "conditions": "Lettuce weight reaches 250g-350g. Flush system with fresh water for 24-48 hours if a cleaner taste is preferred."
+    }
+  ],
+  "nutrient_deficiencies": [
+    {
+      "element": "Nitrogen",
+      "symptoms": "Chlorosis (yellowing) starting from older leaves, stunted overall growth, thin stems.",
+      "causes": "EC levels too low, depletion of nitrogen in recirculating reservoir, root rot preventing absorption.",
+      "corrections": "Increase overall EC concentration gradually. Target 1.2-2.0 mS/cm using a nitrogen-rich formula."
+    },
+    {
+      "element": "Phosphorus",
+      "symptoms": "Dark green or purplish leaves, especially on undersides; stunted root development.",
+      "causes": "Cold reservoir temperature (< 15°C) locking out phosphorus, or pH above 6.5 precipitating phosphate.",
+      "corrections": "Adjust pH down to 5.8-6.2 range. Ensure reservoir water temperature is kept between 18-24°C."
+    },
+    {
+      "element": "Potassium",
+      "symptoms": "Marginal chlorosis and necrosis (browning of leaf tips/margins) on older leaves, curling of leaf edges.",
+      "causes": "Imbalanced nutrient ratio (excess calcium/magnesium blocking potassium), low EC.",
+      "corrections": "Perform a complete reservoir flush and refill with fresh nutrient solution at correct balances."
+    },
+    {
+      "element": "Calcium",
+      "symptoms": "Tip burn on young, developing leaves; deformed or cup-shaped growth tips.",
+      "causes": "High humidity (> 75%) slowing plant transpiration, low calcium in solution, or high salinity/EC (> 2.5 mS/cm).",
+      "corrections": "Increase airflow with fans to encourage transpiration. Maintain humidity at 55-65% and keep EC under 2.0 mS/cm."
+    },
+    {
+      "element": "Magnesium",
+      "symptoms": "Interveinal chlorosis (yellowing between green veins) on older leaves.",
+      "causes": "High potassium or calcium levels blocking magnesium uptake, or low EC.",
+      "corrections": "Add magnesium sulfate (Epsom salts) at 1-2 grams per gallon, or perform a complete reservoir change."
+    },
+    {
+      "element": "Iron",
+      "symptoms": "Interveinal chlorosis on new/young leaves, sometimes turning completely bleached or ivory-white.",
+      "causes": "High water pH (> 6.5) making iron insoluble, cold temperatures, or root rot.",
+      "corrections": "Adjust water pH down to 5.5-6.0 immediately. Use chelated iron (Fe-DTPA or Fe-EDDHA) in solution."
+    }
+  ],
+  "root_diseases": [
+    {
+      "disease": "Pythium Root Rot",
+      "symptoms": "Slimy, brown, or mushy roots; sour smell from reservoir; foliage wilting during warm periods.",
+      "causes": "High reservoir water temperature (> 24°C) lowering dissolved oxygen; poor hygiene; waterborne spores.",
+      "corrections": "Lower water temperature below 21°C. Add beneficial microbes (Bacillus amyloliquefaciens). Clean and sanitize the reservoir."
+    },
+    {
+      "disease": "Fusarium Wilt",
+      "symptoms": "Yellowing of leaves on one side, stunted growth, brown vascular discoloration inside stems, wilting.",
+      "causes": "Warm greenhouse temperatures, infected seedlings, pathogen introduction in contaminated system.",
+      "corrections": "Discard infected plants immediately. Sterilize entire system with bleach/peroxide. Use certified disease-free seeds."
+    }
+  ],
+  "lighting_requirements": {
+    "dli_target": "14-16 mol/m²/day",
+    "photoperiod": "16-18 hours of light per day",
+    "spectrum": "Ratio of 80% red (660nm) to 20% blue (450nm) light for optimal leaf expansion and compact growth.",
+    "light_burn_symptoms": "Bleaching or drying of topmost leaves directly under grow lamps, with no signs of pests or disease."
+  },
+  "dissolved_oxygen_management": {
+    "target_do": "8-10 mg/L (minimum 5 mg/L)",
+    "methods": "Continuous air injection via air stones, venturi air injectors, cascading water return, or mechanical chillers.",
+    "temperature_relationship": "Colder water holds more dissolved oxygen; water at 20°C holds ~9 mg/L, while 26°C water holds less than 8 mg/L.",
+    "oxygen_starvation_symptoms": "Foliage wilting despite wet roots, sluggish nutrient uptake, brown root tips, and susceptibility to root rot."
+  },
+  "harvesting_optimization": {
+    "timing_indicators": "Heads are firm, leaves are crisp, and target fresh weight of 250-350 grams is achieved.",
+    "flushing_protocol": "Recirculate fresh water (zero nutrients) for the final 24-48 hours before harvest to reduce nitrate buildup and bitter flavors.",
+    "post_harvest_handling": "Harvest in early morning to prevent heat stress. Pre-chill heads immediately to 2-4°C and maintain high humidity during storage."
+  },
+  "greenhouse_mistakes": [
+    {
+      "mistake": "Over-fertilization (Excessive EC)",
+      "consequence": "Salt accumulation, osmotic stress causing root dehydration, leaf margin necrosis, and severe tip burn.",
+      "prevention": "Never exceed 2.2 mS/cm for lettuce. Keep standard vegetative EC at 1.4-1.8 mS/cm."
+    },
+    {
+      "mistake": "Light Leaks in Reservoir",
+      "consequence": "Rapid algae colonization, leading to oxygen depletion, pH instability, and clogged plumbing.",
+      "prevention": "Use solid black or opaque green reservoirs. Cover grow channels completely with net pots or neoprene collars."
+    },
+    {
+      "mistake": "Ignoring pH Drift",
+      "consequence": "Nutrient lockout, sudden leaf yellowing, and growth stunting.",
+      "prevention": "Test and adjust reservoir pH daily or install an automated pH dosing system."
+    },
+    {
+      "mistake": "Neglecting System Sanitation",
+      "consequence": "Pathogen carry-over between grow cycles, causing persistent root rot (Pythium) outbreaks.",
+      "prevention": "Thoroughly flush and sanitize the entire system with 10% bleach or active hydrogen peroxide between harvest and transplanting."
+    }
+  ]
+}

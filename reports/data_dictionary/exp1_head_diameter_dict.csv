@@ -1,0 +1,6 @@
+Column Name,Data Type,Missing Count,Missing Percentage,Unique Values,Sample Values,Description
+experiment,str,0,0.0,1,['Experiment 1'],"Experiment identifier (Experiment 1, 2, or 3)"
+replicate,str,0,0.0,6,"['Replicate 1', 'Replicate 2', 'Replicate 3', 'Replicate 4', 'Replicate 5']",Replicate/treatment system identifier
+day,str,0,0.0,5,"['day 3', 'day 6', 'Day 9', 'Day 12', 'Day 13']",Day of measurement relative to transplant
+plant_no,float64,24,11.76,10,"[1.0, 2.0, 3.0, 4.0, 5.0]",Plant identification number within replicate
+head_diameter,str,24,11.76,86,"['4*4', '5*5', '9*12', '11*12', '16*17']",Head diameter (often W*H format)

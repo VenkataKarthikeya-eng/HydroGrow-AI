@@ -1,0 +1,403 @@
+table,column_name,data_type,missing_pct,unique_values,description
+Experiment 1/seedlings,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/seedlings,date,datetime64[us],90.0,1,Date of measurement
+Experiment 1/seedlings,plant_no,int64,0.0,10,Plant identification number within replicate
+Experiment 1/seedlings,plant_height_cm,float64,0.0,4,Total plant height in centimeters
+Experiment 1/seedlings,shoot_length_cm,float64,0.0,3,Shoot (above-root) length in centimeters
+Experiment 1/seedlings,root_length_cm,float64,0.0,3,Root length in centimeters
+Experiment 1/seedlings,head_diameter_cm,str,0.0,7,Head diameter in centimeters (often W*H format)
+Experiment 1/seedlings,stem_diameter_cm,float64,0.0,1,Stem diameter in centimeters
+Experiment 1/seedlings,total_weight_g,float64,0.0,7,Total plant weight in grams
+Experiment 1/seedlings,shoot_weight_g,float64,0.0,9,Shoot weight in grams
+Experiment 1/seedlings,root_weight_g,float64,0.0,9,Root weight in grams
+Experiment 1/seedlings,no_of_leaves,int64,0.0,2,Number of leaves counted
+Experiment 1/sensor_water_quality,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/sensor_water_quality,replicate,str,0.0,1,Replicate/treatment system identifier
+Experiment 1/sensor_water_quality,date,datetime64[s],100.0,0,Date of measurement
+Experiment 1/sensor_water_quality,tme,str,100.0,0,Time of measurement
+Experiment 1/sensor_water_quality,ph,str,100.0,0,pH level of nutrient solution
+Experiment 1/sensor_water_quality,ec,str,100.0,0,Electrical conductivity (mS/cm)
+Experiment 1/sensor_water_quality,tds,str,100.0,0,Total dissolved solids (ppm)
+Experiment 1/sensor_water_quality,water_temp,str,100.0,0,Water temperature (°C)
+Experiment 1/sensor_water_quality,date_1,datetime64[us],70.05,10,[To be documented]
+Experiment 1/sensor_water_quality,tme_1,str,0.16,24,[To be documented]
+Experiment 1/sensor_water_quality,rh_%,float64,0.16,554,Relative humidity percentage
+Experiment 1/sensor_water_quality,air_temp_c,float64,0.16,512,Air temperature (°C)
+Experiment 1/sensor_water_quality,co2_ppm,float64,0.16,620,CO₂ concentration in parts per million
+Experiment 1/portable_water_quality,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/portable_water_quality,date,datetime64[us],65.62,11,Date of measurement
+Experiment 1/portable_water_quality,100000_replicate_1_t1_ph,float64,37.5,12,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_1_t1_ec,float64,37.5,18,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_1_t1_tds,float64,34.38,19,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_1_t1_water_temp,float64,37.5,17,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t1_ph,float64,37.5,9,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t1_ec,float64,37.5,17,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t1_tds,float64,34.38,18,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t1_water_temp,float64,37.5,15,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t1_ph,float64,37.5,12,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t1_ec,float64,37.5,16,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t1_tds,float64,34.38,17,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t1_water_temp,float64,37.5,19,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_1_t2_ph,float64,37.5,12,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_1_t2_ec,float64,37.5,15,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_1_t2_tds,float64,34.38,16,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_1_t2_water_temp,float64,37.5,17,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t2_ph,float64,37.5,11,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t2_ec,float64,37.5,17,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t2_tds,float64,34.38,18,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_2_t2_water_temp,float64,37.5,17,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t2_ph,float64,37.5,11,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t2_ec,float64,37.5,14,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t2_tds,float64,34.38,15,[To be documented]
+Experiment 1/portable_water_quality,100000_replicate_3_t2_water_temp,float64,37.5,18,[To be documented]
+Experiment 1/portable_water_quality,100000_air_air_parameters,float64,56.25,14,[To be documented]
+Experiment 1/portable_water_quality,100000_rh%_col_26,float64,56.25,14,[To be documented]
+Experiment 1/portable_water_quality,100000_air_temp_col_27,float64,56.25,14,[To be documented]
+Experiment 1/portable_water_quality,100000_air_temp_col_28,float64,100.0,0,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t1_ph,float64,43.75,12,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t1_ec,float64,43.75,15,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t1_tds,float64,37.5,14,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t1_water_temp,float64,43.75,15,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t1_ph,float64,43.75,7,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t1_ec,float64,43.75,13,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t1_tds,float64,37.5,13,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t1_water_temp,float64,43.75,17,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t1_ph,float64,43.75,8,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t1_ec,float64,43.75,16,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t1_tds,float64,37.5,15,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t1_water_temp,float64,43.75,15,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t2_ph,float64,43.75,10,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t2_ec,float64,43.75,15,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t2_tds,float64,37.5,14,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_1_t2_water_temp,float64,43.75,16,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t2_ph,float64,43.75,9,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t2_ec,float64,43.75,14,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t2_tds,float64,37.5,13,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_2_t2_water_temp,float64,43.75,16,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t2_ph,float64,43.75,12,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t2_ec,float64,43.75,15,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t2_tds,float64,37.5,14,[To be documented]
+Experiment 1/portable_water_quality,140000_replicate_3_t2_water_temp,float64,43.75,16,[To be documented]
+Experiment 1/portable_water_quality,140000_air_air_parameters,float64,78.12,7,[To be documented]
+Experiment 1/portable_water_quality,140000_rh%_col_54,float64,78.12,7,[To be documented]
+Experiment 1/portable_water_quality,140000_air_temp_col_55,float64,78.12,7,[To be documented]
+Experiment 1/nutrients_date,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/nutrients_date,date,datetime64[us],60.0,2,Date of measurement
+Experiment 1/nutrients_nutrient_solution_addition_(a+b)_ml,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_1_t1,int64,0.0,5,[To be documented]
+Experiment 1/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_2_t1,int64,0.0,5,[To be documented]
+Experiment 1/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_3_t1,int64,0.0,5,[To be documented]
+Experiment 1/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_1_t2,int64,0.0,5,[To be documented]
+Experiment 1/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_2_t2,int64,0.0,5,[To be documented]
+Experiment 1/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_3_t2,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_acid_consumption_(ml),experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/nutrients_acid_consumption_(ml),replicate_1_t1,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_acid_consumption_(ml),replicate_2_t1,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_acid_consumption_(ml),replicate_3_t1,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_acid_consumption_(ml),replicate_1_t2,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_acid_consumption_(ml),replicate_2_t2,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_acid_consumption_(ml),replicate_3_t2,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_water_consumption_l,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/nutrients_water_consumption_l,replicate_1_t1,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_water_consumption_l,replicate_2_t1,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_water_consumption_l,replicate_3_t1,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_water_consumption_l,replicate_1_t2,int64,0.0,4,[To be documented]
+Experiment 1/nutrients_water_consumption_l,replicate_2_t2,int64,0.0,3,[To be documented]
+Experiment 1/nutrients_water_consumption_l,replicate_3_t2,int64,0.0,5,[To be documented]
+Experiment 1/head_diameter,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/head_diameter,replicate,str,0.0,6,Replicate/treatment system identifier
+Experiment 1/head_diameter,day,str,0.0,5,Day of measurement relative to transplant
+Experiment 1/head_diameter,plant_no,float64,11.76,10,Plant identification number within replicate
+Experiment 1/head_diameter,head_diameter,str,11.76,86,Head diameter (often W*H format)
+Experiment 1/harvest,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 1/harvest,plant_no,float64,1.37,12,Plant identification number within replicate
+Experiment 1/harvest,total_weight_g,float64,1.37,54,Total plant weight in grams
+Experiment 1/harvest,plant_height_cm,float64,1.37,26,Total plant height in centimeters
+Experiment 1/harvest,shoot_length_cm,float64,1.37,13,Shoot (above-root) length in centimeters
+Experiment 1/harvest,root_length_cm,float64,1.37,33,Root length in centimeters
+Experiment 1/harvest,head_diameter_cm,str,1.37,35,Head diameter in centimeters (often W*H format)
+Experiment 1/harvest,stem_diameter_cm,float64,1.37,6,Stem diameter in centimeters
+Experiment 1/harvest,shoot_weight_before_removing_wilted_leaves_g,float64,1.37,50,Shoot weight before removing wilted leaves (g)
+Experiment 1/harvest,shoot_weight_after_removing_wilted_leavesg,int64,0.0,50,Shoot weight after removing wilted leaves (g)
+Experiment 1/harvest,root_weight_g,float64,1.37,39,Root weight in grams
+Experiment 1/harvest,no_of_leaves,float64,1.37,21,Number of leaves counted
+Experiment 1/harvest,system,str,0.0,6,"Replicate-Treatment system code (e.g., R1T1)"
+Experiment 2/seedlings,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/seedlings,date,datetime64[s],100.0,0,Date of measurement
+Experiment 2/seedlings,plant_no,int64,0.0,12,Plant identification number within replicate
+Experiment 2/seedlings,plant_height_cm,float64,0.0,5,Total plant height in centimeters
+Experiment 2/seedlings,shoot_length_cm,int64,0.0,4,Shoot (above-root) length in centimeters
+Experiment 2/seedlings,root_length_cm,float64,0.0,4,Root length in centimeters
+Experiment 2/seedlings,head_diameter_cm,str,0.0,11,Head diameter in centimeters (often W*H format)
+Experiment 2/seedlings,stem_diameter_cm,float64,0.0,2,Stem diameter in centimeters
+Experiment 2/seedlings,total_weight_g,float64,0.0,12,Total plant weight in grams
+Experiment 2/seedlings,shoot_weight_g,float64,0.0,12,Shoot weight in grams
+Experiment 2/seedlings,root_weight_g,float64,0.0,12,Root weight in grams
+Experiment 2/seedlings,no_of_leaves,int64,0.0,4,Number of leaves counted
+Experiment 2/sensor_water_quality,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/sensor_water_quality,replicate,str,0.0,1,Replicate/treatment system identifier
+Experiment 2/sensor_water_quality,date,datetime64[s],100.0,0,Date of measurement
+Experiment 2/sensor_water_quality,tme,str,100.0,0,Time of measurement
+Experiment 2/sensor_water_quality,ph,str,100.0,0,pH level of nutrient solution
+Experiment 2/sensor_water_quality,ec,str,100.0,0,Electrical conductivity (mS/cm)
+Experiment 2/sensor_water_quality,tds,str,100.0,0,Total dissolved solids (ppm)
+Experiment 2/sensor_water_quality,water_temp,str,100.0,0,Water temperature (°C)
+Experiment 2/sensor_water_quality,date_1,datetime64[us],0.0,32,[To be documented]
+Experiment 2/sensor_water_quality,tme_1,str,0.0,24,[To be documented]
+Experiment 2/sensor_water_quality,rh%,float64,0.0,591,Relative humidity percentage
+Experiment 2/sensor_water_quality,air_temp,float64,0.0,544,Air temperature (°C)
+Experiment 2/sensor_water_quality,co2,float64,0.0,681,CO₂ concentration
+Experiment 2/portable_water_quality,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/portable_water_quality,date,datetime64[us],41.38,17,Date of measurement
+Experiment 2/portable_water_quality,100000_replicate_1_t1_ph,float64,0.0,14,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_1_t1_ec,float64,0.0,18,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_1_t1_tds,float64,0.0,18,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_1_t1_water_temp,float64,0.0,23,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t1_ph,float64,0.0,10,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t1_ec,float64,0.0,20,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t1_tds,float64,0.0,20,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t1_water_temp,float64,0.0,22,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t1_ph,float64,0.0,14,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t1_ec,float64,0.0,21,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t1_tds,float64,0.0,21,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t1_water_temp,float64,0.0,19,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_1_t2_ph,float64,0.0,14,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_1_t2_ec,float64,0.0,22,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_1_t2_tds,float64,0.0,22,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_1_t2_water_temp,float64,0.0,23,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t2_ph,float64,0.0,15,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t2_ec,float64,0.0,19,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t2_tds,float64,0.0,19,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_2_t2_water_temp,float64,0.0,27,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t2_ph,float64,0.0,13,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t2_ec,float64,0.0,18,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t2_tds,float64,0.0,18,[To be documented]
+Experiment 2/portable_water_quality,100000_replicate_3_t2_water_temp,float64,0.0,27,[To be documented]
+Experiment 2/portable_water_quality,100000_air_air_parameters,float64,17.24,23,[To be documented]
+Experiment 2/portable_water_quality,100000_air_temp_col_26,float64,17.24,23,[To be documented]
+Experiment 2/portable_water_quality,100000_rh_%_col_27,float64,17.24,24,[To be documented]
+Experiment 2/portable_water_quality,100000_rh_%_col_28,float64,100.0,0,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t1_ph,float64,13.79,12,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t1_ec,float64,13.79,17,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t1_tds,float64,13.79,17,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t1_water_temp,float64,13.79,24,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t1_ph,float64,13.79,12,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t1_ec,float64,13.79,15,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t1_tds,float64,13.79,15,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t1_water_temp,float64,13.79,20,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t1_ph,float64,17.24,12,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t1_ec,float64,17.24,19,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t1_tds,float64,17.24,19,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t1_water_temp,float64,17.24,22,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t2_ph,float64,13.79,14,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t2_ec,float64,13.79,17,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t2_tds,float64,13.79,17,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_1_t2_water_temp,float64,13.79,22,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t2_ph,float64,13.79,11,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t2_ec,float64,13.79,18,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t2_tds,float64,13.79,18,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_2_t2_water_temp,float64,13.79,24,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t2_ph,float64,13.79,13,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t2_ec,float64,13.79,14,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t2_tds,float64,13.79,14,[To be documented]
+Experiment 2/portable_water_quality,140000_replicate_3_t2_water_temp,float64,13.79,18,[To be documented]
+Experiment 2/portable_water_quality,140000_air_air_parameters,float64,27.59,21,[To be documented]
+Experiment 2/portable_water_quality,140000_rh%_col_54,float64,27.59,19,[To be documented]
+Experiment 2/portable_water_quality,140000_air_temp_col_55,float64,27.59,20,[To be documented]
+Experiment 2/nutrients_date,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/nutrients_date,date,datetime64[us],50.0,1,Date of measurement
+Experiment 2/nutrients_nutrient_solution_addition_(a+b)_ml,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_1_t1,int64,0.0,3,[To be documented]
+Experiment 2/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_2_t1,int64,0.0,3,[To be documented]
+Experiment 2/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_3_t1,int64,0.0,3,[To be documented]
+Experiment 2/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_1_t2,int64,0.0,3,[To be documented]
+Experiment 2/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_2_t2,int64,0.0,3,[To be documented]
+Experiment 2/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_3_t2,int64,0.0,3,[To be documented]
+Experiment 2/nutrients_water_consumption_l,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/nutrients_water_consumption_l,replicate_1_t1,int64,0.0,1,[To be documented]
+Experiment 2/nutrients_water_consumption_l,replicate_2_t1,int64,0.0,1,[To be documented]
+Experiment 2/nutrients_water_consumption_l,replicate_3_t1,int64,0.0,1,[To be documented]
+Experiment 2/nutrients_water_consumption_l,replicate_1_t2,int64,0.0,1,[To be documented]
+Experiment 2/nutrients_water_consumption_l,replicate_2_t2,int64,0.0,1,[To be documented]
+Experiment 2/nutrients_water_consumption_l,replicate_3_t2,int64,0.0,1,[To be documented]
+Experiment 2/harvest,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/harvest,plant_no,float64,7.69,12,Plant identification number within replicate
+Experiment 2/harvest,total_weight_g,float64,0.0,65,Total plant weight in grams
+Experiment 2/harvest,plant_height_cm,float64,7.69,27,Total plant height in centimeters
+Experiment 2/harvest,shoot_length_cm,float64,7.69,13,Shoot (above-root) length in centimeters
+Experiment 2/harvest,root_length_cm,float64,7.69,35,Root length in centimeters
+Experiment 2/harvest,head_diameter_cm,str,7.69,37,Head diameter in centimeters (often W*H format)
+Experiment 2/harvest,stem_diameter_cm,float64,7.69,5,Stem diameter in centimeters
+Experiment 2/harvest,shoot_weight_before_removing_wilted_leaves_g,float64,7.69,54,Shoot weight before removing wilted leaves (g)
+Experiment 2/harvest,shoot_weight_after_removing_wilted_leavesg,float64,7.69,58,Shoot weight after removing wilted leaves (g)
+Experiment 2/harvest,root_weight_g,float64,7.69,30,Root weight in grams
+Experiment 2/harvest,no_of_leaves,float64,7.69,20,Number of leaves counted
+Experiment 2/harvest,system,str,0.0,6,"Replicate-Treatment system code (e.g., R1T1)"
+Experiment 2/taste_test,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/taste_test,0,str,14.29,6,[To be documented]
+Experiment 2/taste_test,1,float64,28.57,5,[To be documented]
+Experiment 2/taste_test,2,str,14.29,3,[To be documented]
+Experiment 2/taste_test,3,str,14.29,3,[To be documented]
+Experiment 2/taste_test,4,float64,42.86,3,[To be documented]
+Experiment 2/taste_test,5,float64,28.57,3,[To be documented]
+Experiment 2/taste_test,6,float64,28.57,4,[To be documented]
+Experiment 2/taste_test,7,float64,42.86,2,[To be documented]
+Experiment 2/taste_test,8,str,14.29,5,[To be documented]
+Experiment 2/taste_test,9,float64,28.57,3,[To be documented]
+Experiment 2/taste_test,10,float64,28.57,3,[To be documented]
+Experiment 2/taste_test,11,float64,42.86,3,[To be documented]
+Experiment 2/taste_test,12,str,14.29,4,[To be documented]
+Experiment 2/taste_test,13,str,85.71,1,[To be documented]
+Experiment 2/taste_test,14,str,0.0,4,[To be documented]
+Experiment 2/taste_test,15,float64,42.86,3,[To be documented]
+Experiment 2/taste_test,16,float64,28.57,3,[To be documented]
+Experiment 2/taste_test,17,float64,28.57,2,[To be documented]
+Experiment 2/taste_test,18,str,14.29,4,[To be documented]
+Experiment 2/taste_test,19,str,14.29,4,[To be documented]
+Experiment 2/taste_test,20,float64,28.57,2,[To be documented]
+Experiment 2/taste_test,21,str,14.29,4,[To be documented]
+Experiment 2/taste_test,22,str,14.29,5,[To be documented]
+Experiment 2/taste_test,23,float64,42.86,3,[To be documented]
+Experiment 2/form_responses,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 2/form_responses,0,str,14.29,6,[To be documented]
+Experiment 2/form_responses,1,float64,28.57,5,[To be documented]
+Experiment 2/form_responses,2,str,14.29,3,[To be documented]
+Experiment 2/form_responses,3,str,14.29,3,[To be documented]
+Experiment 2/form_responses,4,float64,42.86,3,[To be documented]
+Experiment 2/form_responses,5,float64,28.57,3,[To be documented]
+Experiment 2/form_responses,6,float64,28.57,4,[To be documented]
+Experiment 2/form_responses,7,float64,42.86,2,[To be documented]
+Experiment 2/form_responses,8,str,14.29,5,[To be documented]
+Experiment 2/form_responses,9,float64,28.57,3,[To be documented]
+Experiment 2/form_responses,10,float64,28.57,3,[To be documented]
+Experiment 2/form_responses,11,float64,42.86,3,[To be documented]
+Experiment 2/form_responses,12,str,14.29,4,[To be documented]
+Experiment 2/form_responses,13,str,85.71,1,[To be documented]
+Experiment 2/form_responses,14,str,0.0,4,[To be documented]
+Experiment 2/form_responses,15,float64,42.86,3,[To be documented]
+Experiment 2/form_responses,16,float64,28.57,3,[To be documented]
+Experiment 2/form_responses,17,float64,28.57,2,[To be documented]
+Experiment 2/form_responses,18,str,14.29,4,[To be documented]
+Experiment 2/form_responses,19,str,14.29,4,[To be documented]
+Experiment 2/form_responses,20,float64,28.57,2,[To be documented]
+Experiment 2/form_responses,21,str,14.29,4,[To be documented]
+Experiment 2/form_responses,22,str,14.29,5,[To be documented]
+Experiment 2/form_responses,23,float64,42.86,3,[To be documented]
+Experiment 2/form_responses,24,str,85.71,1,[To be documented]
+Experiment 3/seedlings,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/seedlings,plant_no,int64,0.0,10,Plant identification number within replicate
+Experiment 3/seedlings,plant_height_cm,float64,0.0,7,Total plant height in centimeters
+Experiment 3/seedlings,shoot_length_cm,float64,0.0,4,Shoot (above-root) length in centimeters
+Experiment 3/seedlings,root_length_cm,float64,0.0,6,Root length in centimeters
+Experiment 3/seedlings,head_diameter_cm,str,0.0,10,Head diameter in centimeters (often W*H format)
+Experiment 3/seedlings,stem_diameter_cm,float64,0.0,2,Stem diameter in centimeters
+Experiment 3/seedlings,total_weight_g,int64,0.0,3,Total plant weight in grams
+Experiment 3/seedlings,shoot_weight_g,int64,0.0,3,Shoot weight in grams
+Experiment 3/seedlings,root_weight_g,int64,0.0,3,Root weight in grams
+Experiment 3/seedlings,no_of_leaves,int64,0.0,4,Number of leaves counted
+Experiment 3/sensor_water_quality,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/sensor_water_quality,replicate,str,0.0,1,Replicate/treatment system identifier
+Experiment 3/sensor_water_quality,date,datetime64[s],100.0,0,Date of measurement
+Experiment 3/sensor_water_quality,tme,str,100.0,0,Time of measurement
+Experiment 3/sensor_water_quality,ph,str,100.0,0,pH level of nutrient solution
+Experiment 3/sensor_water_quality,ec,str,100.0,0,Electrical conductivity (mS/cm)
+Experiment 3/sensor_water_quality,tds,str,100.0,0,Total dissolved solids (ppm)
+Experiment 3/sensor_water_quality,water_temp,str,100.0,0,Water temperature (°C)
+Experiment 3/sensor_water_quality,date_1,datetime64[us],0.0,32,[To be documented]
+Experiment 3/sensor_water_quality,tme_1,str,0.0,24,[To be documented]
+Experiment 3/sensor_water_quality,rh%,float64,0.0,595,Relative humidity percentage
+Experiment 3/sensor_water_quality,air_temp,float64,0.0,501,Air temperature (°C)
+Experiment 3/sensor_water_quality,co2,float64,0.0,679,CO₂ concentration
+Experiment 3/portable_water_quality,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/portable_water_quality,date,datetime64[us],60.61,13,Date of measurement
+Experiment 3/portable_water_quality,100000_replicate_1_t1_ph,float64,18.18,18,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_1_t1_ec,float64,15.15,28,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_1_t1_tds,float64,15.15,28,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_1_t1_water_temp,float64,15.15,21,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t1_ph,float64,18.18,15,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t1_ec,float64,15.15,25,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t1_tds,float64,15.15,25,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t1_water_temp,float64,15.15,20,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t1_ph,float64,18.18,15,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t1_ec,float64,15.15,21,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t1_tds,float64,15.15,21,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t1_water_temp,float64,15.15,22,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_1_t2_ph,float64,15.15,11,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_1_t2_ec,float64,15.15,25,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_1_t2_tds,float64,15.15,25,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_1_t2_water_temp,float64,18.18,20,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t2_ph,float64,21.21,11,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t2_ec,float64,18.18,26,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t2_tds,float64,18.18,26,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_2_t2_water_temp,float64,18.18,20,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t2_ph,float64,21.21,12,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t2_ec,float64,18.18,22,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t2_tds,float64,18.18,22,[To be documented]
+Experiment 3/portable_water_quality,100000_replicate_3_t2_water_temp,float64,24.24,20,[To be documented]
+Experiment 3/portable_water_quality,100000_air_air_parameters,float64,33.33,21,[To be documented]
+Experiment 3/portable_water_quality,100000_air_temp_col_26,float64,33.33,17,[To be documented]
+Experiment 3/portable_water_quality,100000_rh%_col_27,float64,33.33,21,[To be documented]
+Experiment 3/portable_water_quality,100000_rh%_col_28,float64,100.0,0,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t1_ph,float64,18.18,15,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t1_ec,float64,18.18,22,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t1_tds,float64,18.18,22,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t1_water_temp,float64,18.18,24,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t1_ph,float64,18.18,16,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t1_ec,float64,18.18,26,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t1_tds,float64,18.18,26,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t1_water_temp,float64,18.18,21,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t1_ph,float64,18.18,15,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t1_ec,float64,18.18,24,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t1_tds,float64,18.18,24,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t1_water_temp,float64,21.21,22,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t2_ph,float64,21.21,9,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t2_ec,float64,21.21,22,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t2_tds,float64,21.21,22,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_1_t2_water_temp,float64,21.21,20,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t2_ph,float64,21.21,8,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t2_ec,float64,21.21,22,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t2_tds,float64,21.21,22,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_2_t2_water_temp,float64,21.21,20,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t2_ph,float64,21.21,11,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t2_ec,float64,21.21,23,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t2_tds,float64,21.21,23,[To be documented]
+Experiment 3/portable_water_quality,140000_replicate_3_t2_water_temp,float64,21.21,16,[To be documented]
+Experiment 3/portable_water_quality,140000_air_air_parameters,float64,33.33,20,[To be documented]
+Experiment 3/portable_water_quality,140000_air_temp_col_54,float64,33.33,19,[To be documented]
+Experiment 3/portable_water_quality,140000_rh%_col_55,float64,33.33,21,[To be documented]
+Experiment 3/nutrients_date,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/nutrients_date,date,datetime64[us],66.67,1,Date of measurement
+Experiment 3/nutrients_nutrient_solution_addition_(a+b)_ml,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_1_t1,int64,0.0,3,[To be documented]
+Experiment 3/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_2_t1,int64,0.0,3,[To be documented]
+Experiment 3/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_3_t1,int64,0.0,3,[To be documented]
+Experiment 3/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_1_t2,int64,0.0,3,[To be documented]
+Experiment 3/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_2_t2,int64,0.0,3,[To be documented]
+Experiment 3/nutrients_nutrient_solution_addition_(a+b)_ml,replicate_3_t2,int64,0.0,3,[To be documented]
+Experiment 3/nutrients_water_consumption_l,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/nutrients_water_consumption_l,replicate_1_t1,int64,0.0,4,[To be documented]
+Experiment 3/nutrients_water_consumption_l,replicate_2_t1,int64,0.0,4,[To be documented]
+Experiment 3/nutrients_water_consumption_l,replicate_3_t1,int64,0.0,4,[To be documented]
+Experiment 3/nutrients_water_consumption_l,replicate_1_t2,int64,0.0,4,[To be documented]
+Experiment 3/nutrients_water_consumption_l,replicate_2_t2,int64,0.0,4,[To be documented]
+Experiment 3/nutrients_water_consumption_l,replicate_3_t2,int64,0.0,4,[To be documented]
+Experiment 3/nutrients_acid_consumption_ml,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/nutrients_acid_consumption_ml,replicate_1_t1,int64,0.0,2,[To be documented]
+Experiment 3/nutrients_acid_consumption_ml,replicate_2_t1,int64,0.0,2,[To be documented]
+Experiment 3/nutrients_acid_consumption_ml,replicate_3_t1,int64,0.0,2,[To be documented]
+Experiment 3/nutrients_acid_consumption_ml,replicate_1_t2,int64,0.0,2,[To be documented]
+Experiment 3/nutrients_acid_consumption_ml,replicate_2_t2,int64,0.0,2,[To be documented]
+Experiment 3/nutrients_acid_consumption_ml,replicate_3_t2,int64,0.0,2,[To be documented]
+Experiment 3/harvest,experiment,str,0.0,1,"Experiment identifier (Experiment 1, 2, or 3)"
+Experiment 3/harvest,system,str,0.0,7,"Replicate-Treatment system code (e.g., R1T1)"
+Experiment 3/harvest,plant_no,float64,8.86,12,Plant identification number within replicate
+Experiment 3/harvest,plant_height_cm,float64,1.27,33,Total plant height in centimeters
+Experiment 3/harvest,shoot_length_cm,float64,1.27,14,Shoot (above-root) length in centimeters
+Experiment 3/harvest,root_length_cm,float64,1.27,35,Root length in centimeters
+Experiment 3/harvest,hd_cm,str,7.59,51,Head diameter in centimeters (often W*H format)
+Experiment 3/harvest,total_weight_g,float64,1.27,61,Total plant weight in grams
+Experiment 3/harvest,stem_diameter_cm,float64,1.27,9,Stem diameter in centimeters
+Experiment 3/harvest,shoot_weight_before_removing_wilted_leaves_g,float64,1.27,64,Shoot weight before removing wilted leaves (g)
+Experiment 3/harvest,shoot_weight_after_removing_wilted_leaves_g,float64,1.27,66,[To be documented]
+Experiment 3/harvest,root_weight_g,float64,1.27,35,Root weight in grams
+Experiment 3/harvest,noof_leaves,float64,1.27,25,[To be documented]

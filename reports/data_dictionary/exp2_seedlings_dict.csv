@@ -1,0 +1,13 @@
+Column Name,Data Type,Missing Count,Missing Percentage,Unique Values,Sample Values,Description
+experiment,str,0,0.0,1,['Experiment 2'],"Experiment identifier (Experiment 1, 2, or 3)"
+date,datetime64[s],12,100.0,0,[],Date of measurement
+plant_no,int64,0,0.0,12,"[1, 2, 3, 4, 5]",Plant identification number within replicate
+plant_height_cm,float64,0,0.0,5,"[11.0, 13.0, 12.5, 12.0, 14.0]",Total plant height in centimeters
+shoot_length_cm,int64,0,0.0,4,"[5, 7, 6, 8]",Shoot (above-root) length in centimeters
+root_length_cm,float64,0,0.0,4,"[6.0, 7.5, 8.0, 7.0]",Root length in centimeters
+head_diameter_cm,str,0,0.0,11,"['7*8', '6*7', '5*6', '6*4', '6*4.5']",Head diameter in centimeters (often W*H format)
+stem_diameter_cm,float64,0,0.0,2,"[0.3, 0.2]",Stem diameter in centimeters
+total_weight_g,float64,0,0.0,12,"[5.13, 5.0, 5.25, 4.85, 5.36]",Total plant weight in grams
+shoot_weight_g,float64,0,0.0,12,"[2.41, 2.14, 1.58, 2.45, 1.93]",Shoot weight in grams
+root_weight_g,float64,0,0.0,12,"[2.72, 2.86, 3.67, 2.3999999999999995, 3.4300000000000006]",Root weight in grams
+no_of_leaves,int64,0,0.0,4,"[7, 5, 6, 8]",Number of leaves counted
