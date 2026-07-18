@@ -17,6 +17,8 @@ if BASE_DIR not in sys.path:
 
 from knowledge_loader import load_knowledge_base
 from document_processor import split_into_chunks, build_inverted_index, normalize_text
+from backend.rag.query_processor import QueryProcessor
+from backend.rag.document_ranker import DocumentRanker
 
 
 class LocalRetriever:
@@ -39,13 +41,19 @@ class LocalRetriever:
             # Standard IDF formula with smoothing to avoid division by zero
             self.idf[token] = math.log(1.0 + (self.total_chunks / (len(chunk_ids) + 1.0)))
 
-    def retrieve(self, query: str, top_k: int = 3) -> list[dict]:
+    def retrieve(self, query: str, top_k: int = 3, intent: Optional[str] = None) -> list[dict]:
         """
         Retrieves the top-k most relevant knowledge chunks based on query tokens.
         Each returned dict matches: {"content": str, "source": str, "score": float}
         """
         start_time = time.time()
-        query_tokens = normalize_text(query)
+        
+        # Conditionally expand query based on intent
+        processed_query = query
+        if intent and intent != "fallback":
+            processed_query = QueryProcessor.expand_query(query, intent)
+
+        query_tokens = normalize_text(processed_query)
         
         # Track matching tokens per chunk ID
         chunk_matches = {}
@@ -75,11 +83,8 @@ class LocalRetriever:
                 
             scores[chunk_id] = chunk_score
             
-        # Sort chunks by highest score descending
-        sorted_chunks = sorted(scores.items(), key=lambda item: item[1], reverse=True)
-        
         results = []
-        for chunk_id, score in sorted_chunks[:top_k]:
+        for chunk_id, score in scores.items():
             chunk = self.chunks[chunk_id]
             results.append({
                 "content": chunk["content"],
@@ -87,17 +92,20 @@ class LocalRetriever:
                 "score": score
             })
             
+        # Rerank matching documents
+        ranked = DocumentRanker.rank_documents(results)
+        
         retrieval_time = time.time() - start_time
         # print(f"[INFO] Retrieval completed in {retrieval_time * 1000:.2f} ms")
         
-        return results
+        return ranked[:top_k]
 
 
 # Global singleton instance
 _retriever_instance = None
 
 
-def retrieve(query: str, top_k: int = 3) -> list[dict]:
+def retrieve(query: str, top_k: int = 3, intent: Optional[str] = None) -> list[dict]:
     """
     Independent wrapper function for knowledge retrieval.
     Allows easy future replacement with vector DB backends (FAISS, ChromaDB, etc.)
@@ -107,7 +115,7 @@ def retrieve(query: str, top_k: int = 3) -> list[dict]:
     if _retriever_instance is None:
         _retriever_instance = LocalRetriever()
         
-    return _retriever_instance.retrieve(query, top_k=top_k)
+    return _retriever_instance.retrieve(query, top_k=top_k, intent=intent)
 
 
 if __name__ == "__main__":
