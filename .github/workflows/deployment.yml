@@ -1,0 +1,38 @@
+name: HydroGrow AI Cloud & Kubernetes Deployment Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-and-deploy:
+    name: Build Docker Images & Deployment Pipeline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Run Backend Unit Tests
+        run: |
+          pip install -r requirements.txt
+          python -m unittest discover -s tests
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Build Frontend Vite Bundle
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Validate Kubernetes Manifests
+        run: |
+          kubectl apply --dry-run=client -f deployment/
