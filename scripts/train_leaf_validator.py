@@ -1,0 +1,201 @@
+import os
+import sys
+import time
+import ssl
+import glob
+import pandas as pd
+import numpy as np
+from PIL import Image
+
+# Bypass SSL verification for PyTorch hub weights download
+ssl._create_default_https_context = ssl._create_unverified_context
+
+import torch
+import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+import torchvision.transforms as T
+import torchvision.models as models
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, accuracy_score, confusion_matrix
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, ".."))
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+CLASS_NAMES = ['non_leaf', 'lettuce_leaf']
+CLASS_TO_IDX = {c: i for i, c in enumerate(CLASS_NAMES)}
+
+class LeafValidatorDataset(Dataset):
+    def __init__(self, df, transform=None):
+        self.df = df.reset_index(drop=True)
+        self.transform = transform
+
+    def __len__(self):
+        return len(self.df)
+
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        img_path = row['image_path']
+        if not os.path.isabs(img_path):
+            img_path = os.path.normpath(os.path.join(PROJECT_ROOT, img_path))
+            
+        try:
+            image = Image.open(img_path).convert('RGB')
+        except Exception:
+            image = Image.new('RGB', (224, 224), (0, 0, 0))
+
+        label_idx = CLASS_TO_IDX[row['class']]
+        if self.transform:
+            image = self.transform(image)
+
+        return image, torch.tensor(label_idx, dtype=torch.long)
+
+class MobileNetV3LeafValidator(nn.Module):
+    def __init__(self, num_classes=2):
+        super().__init__()
+        weights = models.MobileNet_V3_Small_Weights.DEFAULT
+        self.backbone = models.mobilenet_v3_small(weights=weights)
+        in_features = self.backbone.classifier[0].in_features
+        
+        self.backbone.classifier = nn.Sequential(
+            nn.Linear(in_features, 128),
+            nn.Hardswish(),
+            nn.Dropout(p=0.2),
+            nn.Linear(128, num_classes)
+        )
+
+    def forward(self, x):
+        return self.backbone(x)
+
+def train_leaf_validator(epochs=10, batch_size=16):
+    print("=" * 60)
+    print("STEP 2: MOBILENETV3-SMALL LEAF VALIDATOR TRAINING")
+    print("=" * 60)
+
+    dataset_dir = os.path.join(PROJECT_ROOT, "data", "leaf_validator_dataset")
+    records = []
+    
+    for cls in CLASS_NAMES:
+        cls_dir = os.path.join(dataset_dir, cls)
+        for img_p in glob.glob(os.path.join(cls_dir, "*.*")):
+            ext = os.path.splitext(img_p)[1].lower()
+            if ext in ['.png', '.jpg', '.jpeg']:
+                records.append({
+                    'image_path': os.path.normpath(img_p).replace('\\', '/'),
+                    'class': cls
+                })
+
+    df = pd.DataFrame(records)
+    print(f"Total dataset size: {len(df)} images.")
+    print("Class distribution:")
+    print(df['class'].value_counts())
+
+    train_df, val_df = train_test_split(df, test_size=0.20, stratify=df['class'], random_state=42)
+    print(f"Train count: {len(train_df)} | Val count: {len(val_df)}")
+
+    train_transform = T.Compose([
+        T.Resize((224, 224)),
+        T.RandomHorizontalFlip(),
+        T.RandomRotation(15),
+        T.ToTensor(),
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    val_transform = T.Compose([
+        T.Resize((224, 224)),
+        T.ToTensor(),
+        T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    train_loader = DataLoader(LeafValidatorDataset(train_df, train_transform), batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(LeafValidatorDataset(val_df, val_transform), batch_size=batch_size, shuffle=False)
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    print(f"Training on device: {device}")
+
+    model = MobileNetV3LeafValidator(num_classes=2).to(device)
+    criterion = nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+
+    best_val_loss = float('inf')
+    best_state = None
+
+    for epoch in range(1, epochs + 1):
+        model.train()
+        train_loss, train_correct, train_total = 0.0, 0, 0
+
+        for imgs, labels in train_loader:
+            imgs, labels = imgs.to(device), labels.to(device)
+            optimizer.zero_grad()
+            outputs = model(imgs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item() * imgs.size(0)
+            preds = torch.argmax(outputs, dim=1)
+            train_correct += (preds == labels).sum().item()
+            train_total += labels.size(0)
+
+        epoch_train_loss = train_loss / train_total
+        epoch_train_acc = train_correct / train_total
+
+        # Validation phase
+        model.eval()
+        val_loss, val_correct, val_total = 0.0, 0, 0
+        val_preds, val_targets = [], []
+
+        with torch.no_grad():
+            for imgs, labels in val_loader:
+                imgs, labels = imgs.to(device), labels.to(device)
+                outputs = model(imgs)
+                loss = criterion(outputs, labels)
+                val_loss += loss.item() * imgs.size(0)
+                preds = torch.argmax(outputs, dim=1)
+                val_correct += (preds == labels).sum().item()
+                val_total += labels.size(0)
+                val_preds.extend(preds.cpu().numpy())
+                val_targets.extend(labels.cpu().numpy())
+
+        epoch_val_loss = val_loss / val_total
+        epoch_val_acc = val_correct / val_total
+
+        if epoch_val_loss < best_val_loss:
+            best_val_loss = epoch_val_loss
+            best_state = model.state_dict().copy()
+
+        print(f"Epoch [{epoch:02d}/{epochs}] - Train Loss: {epoch_train_loss:.4f} Acc: {epoch_train_acc*100:.1f}% | Val Loss: {epoch_val_loss:.4f} Acc: {epoch_val_acc*100:.1f}%")
+
+    model.load_state_dict(best_state)
+    model.eval()
+    val_acc = accuracy_score(val_targets, val_preds)
+    print(f"\nFinal Validation Accuracy: {val_acc * 100:.2f}%")
+    print(classification_report(val_targets, val_preds, target_names=CLASS_NAMES))
+    print("Confusion Matrix:")
+    print(confusion_matrix(val_targets, val_preds))
+
+    # Save trained model to backend/ml_models/leaf_validator_model.keras and ml/models/
+    save_dirs = [
+        os.path.join(PROJECT_ROOT, "backend", "ml_models"),
+        os.path.join(PROJECT_ROOT, "ml", "models")
+    ]
+    
+    artifact_payload = {
+        'model_state_dict': best_state,
+        'class_names': CLASS_NAMES,
+        'val_accuracy': float(val_acc),
+        'architecture': 'MobileNetV3LeafValidator'
+    }
+
+    for d in save_dirs:
+        os.makedirs(d, exist_ok=True)
+        model_path = os.path.join(d, "leaf_validator_model.keras")
+        torch.save(artifact_payload, model_path)
+        print(f"Saved model artifact to '{model_path}'")
+
+    print("\nLeaf Validator Model Training & Export Completed Successfully!")
+    return val_acc
+
+if __name__ == '__main__':
+    train_leaf_validator(epochs=10, batch_size=16)

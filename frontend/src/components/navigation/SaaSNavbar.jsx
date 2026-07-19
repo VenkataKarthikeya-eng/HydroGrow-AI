@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Sprout, Bot, Menu, X, LayoutDashboard, User, History, 
   TrendingUp, Cpu, Sliders, Camera, Sun, Moon, Sparkles, 
-  ChevronDown, Store, LogOut, Settings, Bell
+  ChevronDown, Store, LogOut, Settings
 } from 'lucide-react';
 import { AppContext } from '../../context/AppContext';
 
@@ -246,16 +246,6 @@ export default function SaaSNavbar() {
             >
               {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
             </button>
-
-            {/* Notification Bell Badge (Matching Screenshot: 🔔 2) */}
-            <div className="relative cursor-pointer">
-              <div className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-xs">
-                  2
-                </span>
-              </div>
-            </div>
 
             {/* User Profile Avatar with Dropdown (Matching Screenshot: 👤 Karthikeya ▼) */}
             <div className="relative pl-2">

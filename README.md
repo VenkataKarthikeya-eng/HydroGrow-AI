@@ -38,8 +38,78 @@ The platform combines:
 
 to help growers maximize crop yield, optimize resources, detect plant issues early, and make intelligent farming decisions.
 
-
 ---
+
+# 🔬 Plant Doctor AI Scanner
+
+HydroGrow AI provides a Deep Learning based lettuce health analysis system using three AI models.
+
+## 🌱 Model 1 — Growth Prediction (EfficientNetB0)
+
+Predicts:
+
+- Growth Stage
+- Growth Day
+- Harvest Readiness
+
+Dataset:
+- 124,486 hydroponic lettuce images
+
+Stages:
+- Seedling
+- Vegetative
+- Mature / Harvest
+
+
+## 🧪 Model 2 — Nutrient Deficiency Detection (MobileNetV3Small)
+
+Detects:
+
+- Healthy
+- Nitrogen Deficiency
+- Phosphorus Deficiency
+- Potassium Deficiency
+
+
+## 🛡️ Model 3 — Crop Validation AI Guard
+
+Validates uploaded images before diagnosis.
+
+Rejects:
+
+- Documents
+- Random objects
+- Other plant leaves
+
+Allows:
+
+- Lettuce leaf images only
+
+
+## AI Pipeline
+React Plant Doctor
+|
+↓
+FastAPI Vision API
+|
+↓
+Crop Validation Model
+|
+↓
+Growth Model + Nutrient Model
+|
+↓
+AI Cultivation Recommendation
+
+
+
+## Model Performance
+
+| Model | Architecture | Purpose |
+|-|-|-|
+| Growth Prediction | EfficientNetB0 | Growth stage & age |
+| Nutrient Detection | MobileNetV3Small | NPK deficiency detection |
+| Crop Validation | MobileNetV3Small | Lettuce image verification |
 
 # 🎯 Problem Statement
 
@@ -578,5 +648,7 @@ If you find this project interesting:
 
 
 ---
+
+
 
 ## Built with ❤️ for the future of intelligent agriculture

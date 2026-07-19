@@ -1,5 +1,6 @@
 import os
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import Optional, Any
 from backend.database.connection import get_db
@@ -13,6 +14,9 @@ from backend.services.vision.vision_recommendation import VisionRecommendation
 from backend.services.automation.action_simulator import ActionSimulator
 from backend.api.websocket_routes import ws_manager
 from backend.ml.inference.ml_engine import MLEngine
+from backend.services.growth_prediction_service import growth_service
+from backend.services.nutrient_prediction_service import nutrient_service
+from backend.services.crop_validation_service import crop_validation_service
 
 router = APIRouter()
 
@@ -199,3 +203,107 @@ def get_analysis_report(
         "recommendations": analysis.recommendations,
         "uploaded_at": analysis.image.uploaded_at.isoformat() if analysis.image.uploaded_at else None
     }
+
+@router.post("/predict-growth", summary="Predict Lettuce Growth Stage and Growth Day from Plant Image")
+async def predict_growth_stage(
+    file: UploadFile = File(...)
+):
+    """
+    Accepts plant image upload and returns lettuce growth stage, predicted growth day,
+    model confidence score, and stage-specific cultivation recommendations.
+    """
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Uploaded file must have a valid filename.")
+    
+    contents = await file.read()
+    
+    # Model 3: Crop Identity Validation Security Gate
+    val_check = crop_validation_service.validate_crop_image(contents)
+    if val_check.get("status") == "rejected":
+        return JSONResponse(
+            status_code=400,
+            content=val_check
+        )
+
+    try:
+        result = growth_service.predict_image(contents)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Image processing failed: {str(e)}")
+
+@router.post("/predict-nutrient", summary="Detect Lettuce Nutrient Deficiency from Leaf Image")
+async def predict_nutrient_condition(
+    file: UploadFile = File(...)
+):
+    """
+    Accepts plant leaf image upload and returns nutrient condition (Healthy, Nitrogen Deficiency,
+    Phosphorus Deficiency, Potassium Deficiency), confidence score, and tailored recommendation.
+    """
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Uploaded file must have a valid filename.")
+
+    contents = await file.read()
+    
+    # Model 3: Crop Identity Validation Security Gate
+    val_check = crop_validation_service.validate_crop_image(contents)
+    if val_check.get("status") == "rejected":
+        return JSONResponse(
+            status_code=400,
+            content=val_check
+        )
+
+    try:
+        result = nutrient_service.predict_image(contents)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Nutrient analysis failed: {str(e)}")
+
+@router.post("/plant-analysis", summary="Combined Growth & Nutrient Plant Analysis Scanner")
+async def analyze_plant_combined(
+    file: UploadFile = File(...)
+):
+    """
+    Combines Model 1 (Growth Stage & Growth Day) and Model 2 (Nutrient Deficiency Detection)
+    into a unified diagnostic response with overarching cultivation recommendations.
+    """
+    if not file.filename:
+        raise HTTPException(status_code=400, detail="Uploaded file must have a valid filename.")
+
+    contents = await file.read()
+
+    # Model 3: Crop Identity Validation Security Gate
+    val_check = crop_validation_service.validate_crop_image(contents)
+    if val_check.get("status") == "rejected":
+        return JSONResponse(
+            status_code=400,
+            content=val_check
+        )
+
+    try:
+        growth_res = growth_service.predict_image(contents)
+        nutrient_res = nutrient_service.predict_image(contents)
+
+        # Combined recommendation logic
+        if nutrient_res.get("condition") == "Healthy":
+            overall_rec = f"Plant growth is in {growth_res.get('growth_stage')} stage (Day {growth_res.get('growth_day')}). {nutrient_res.get('recommendation')}"
+        else:
+            overall_rec = f"Action required: Detected {nutrient_res.get('condition')} at Day {growth_res.get('growth_day')}. {nutrient_res.get('recommendation')}"
+
+        return {
+            "growth_prediction": {
+                "stage": growth_res.get("growth_stage"),
+                "growth_day": growth_res.get("growth_day"),
+                "confidence": growth_res.get("confidence")
+            },
+            "nutrient_prediction": {
+                "condition": nutrient_res.get("condition"),
+                "confidence": nutrient_res.get("confidence")
+            },
+            "recommendation": overall_rec
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Combined plant analysis failed: {str(e)}")
+
+
+
+

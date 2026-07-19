@@ -3,3 +3,22 @@ dist/
 .env
 frontend/node_modules/
 frontend/dist/
+
+# Python
+__pycache__/
+*.pyc
+
+# Databases
+*.db
+
+# Environment
+.env
+
+# ML datasets
+data/growth_dataset/
+data/nutrient_dataset/
+data/leaf_validator_dataset/
+data/crop_validator_dataset/
+
+# Training outputs
+*.keras
