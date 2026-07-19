@@ -26,10 +26,10 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Enable CORS using production settings
+# Enable CORS using production settings and wildcard/Vercel origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS if settings.CORS_ORIGINS else ["*"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -64,9 +64,7 @@ async def validation_exception_handler(request, exc):
 def get_health_check():
     return {
         "status": "healthy",
-        "database": "connected",
-        "service": "HydroGrow AI API",
-        "version": "1.0"
+        "service": "HydroGrow AI Backend"
     }
 
 # Include routers

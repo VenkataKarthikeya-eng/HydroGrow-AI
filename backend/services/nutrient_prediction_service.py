@@ -10,7 +10,20 @@ import numpy as np
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, "..", ".."))
 
-MODEL_PATH = os.path.join(PROJECT_ROOT, "backend", "ml_models", "nutrient_model.keras")
+def get_nutrient_model_path():
+    filename = "nutrient_model.keras"
+    candidates = [
+        os.path.join(PROJECT_ROOT, "backend", "ml_models", filename),
+        os.path.join(PROJECT_ROOT, "ml_models", filename),
+        os.path.join("backend", "ml_models", filename),
+        os.path.join("ml_models", filename),
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return os.path.normpath(c)
+    return os.path.join(PROJECT_ROOT, "backend", "ml_models", filename)
+
+MODEL_PATH = get_nutrient_model_path()
 
 CLASS_NAMES = ['healthy', 'nitrogen_deficiency', 'phosphorus_deficiency', 'potassium_deficiency']
 

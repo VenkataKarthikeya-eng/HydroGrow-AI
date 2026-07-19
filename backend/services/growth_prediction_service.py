@@ -10,7 +10,20 @@ import numpy as np
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, "..", ".."))
 
-MODEL_PATH = os.path.join(PROJECT_ROOT, "backend", "ml_models", "growth_model.keras")
+def get_growth_model_path():
+    filename = "growth_model.keras"
+    candidates = [
+        os.path.join(PROJECT_ROOT, "backend", "ml_models", filename),
+        os.path.join(PROJECT_ROOT, "ml_models", filename),
+        os.path.join("backend", "ml_models", filename),
+        os.path.join("ml_models", filename),
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            return os.path.normpath(c)
+    return os.path.join(PROJECT_ROOT, "backend", "ml_models", filename)
+
+MODEL_PATH = get_growth_model_path()
 
 STAGE_CLASSES = ['Seedling', 'Vegetative', 'Mature / Harvest']
 

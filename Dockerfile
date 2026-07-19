@@ -1,4 +1,4 @@
-# HydroGrow AI Backend Production Dockerfile for Render.com
+# HydroGrow AI Backend Production Dockerfile for Render.com Root Context
 FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1 \
@@ -7,27 +7,22 @@ ENV PYTHONUNBUFFERED=1 \
 
 WORKDIR /app
 
-# Install essential build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python packages
 COPY backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r /app/backend/requirements.txt
 
-# Copy backend code and dataset references
 COPY backend /app/backend
 COPY data /app/data
 
-# Set PYTHONPATH to /app for clean module imports
 ENV PYTHONPATH=/app
 
 EXPOSE 8000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:8000/health || exit 1
 
