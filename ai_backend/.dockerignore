@@ -5,12 +5,7 @@
 __pycache__/
 venv/
 .venv/
-frontend/node_modules/
-frontend/dist/
-.idea/
-.vscode/
 *.log
 
 # Explicitly include model files in Docker build context
 !ml_models/*.keras
-!ai_backend/ml_models/*.keras

@@ -16,6 +16,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ml_models ./ml_models
+RUN ls -lah /app/ml_models
+
 COPY . .
 
 EXPOSE 8000
