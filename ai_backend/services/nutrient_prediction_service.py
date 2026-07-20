@@ -1,8 +1,10 @@
 import os
 import sys
 import io
+from pathlib import Path
 from PIL import Image
 import numpy as np
+
 try:
     import torch
     import torchvision.transforms as T
@@ -29,25 +31,14 @@ except ImportError:
     HAS_TORCH = False
     MobileNetV3NutrientModel = None
 
-from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = BASE_DIR.parent
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, ".."))
-
-def get_nutrient_model_path():
-    filename = "nutrient_model.keras"
-    candidates = [
-        Path("/app/ml_models") / filename,
-        Path(PROJECT_ROOT) / "ml_models" / filename,
-        Path(BASE_DIR).parent / "ml_models" / filename,
-        Path("ml_models") / filename,
-    ]
-    for c in candidates:
-        if c.exists():
-            return str(c)
-    return str(Path("/app/ml_models") / filename)
-
-MODEL_PATH = get_nutrient_model_path()
+MODEL_PATH = Path("/app/ml_models/nutrient_model.keras")
+if not MODEL_PATH.exists():
+    local_path = PROJECT_ROOT / "ml_models" / "nutrient_model.keras"
+    if local_path.exists():
+        MODEL_PATH = local_path
 
 CLASS_NAMES = ['healthy', 'nitrogen_deficiency', 'phosphorus_deficiency', 'potassium_deficiency']
 
@@ -66,8 +57,8 @@ RECOMMENDATIONS = {
 }
 
 class NutrientPredictionService:
-    def __init__(self, model_path: str = MODEL_PATH):
-        self.model_path = model_path
+    def __init__(self, model_path: Path = MODEL_PATH):
+        self.model_path = Path(model_path)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') if HAS_TORCH else 'cpu'
         self.model = None
         if HAS_TORCH:
@@ -81,50 +72,54 @@ class NutrientPredictionService:
         self._load_model()
 
     def _load_model(self):
-        if HAS_TORCH and os.path.exists(self.model_path):
+        print(f"[NutrientPredictionService] Checking model: {self.model_path}")
+        print(f"Exists: {self.model_path.exists()}")
+
+        if self.model_path.exists():
             try:
-                checkpoint = torch.load(self.model_path, map_location=self.device)
-                self.model = MobileNetV3NutrientModel(num_classes=4).to(self.device)
-                
-                if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-                    self.model.load_state_dict(checkpoint['model_state_dict'])
-                elif isinstance(checkpoint, dict):
-                    self.model.load_state_dict(checkpoint)
-                    
-                self.model.eval()
-                print("[NutrientPredictionService] Loaded nutrient model successfully.")
+                try:
+                    import tensorflow as tf
+                    self.model = tf.keras.models.load_model(str(self.model_path))
+                except Exception as tf_err:
+                    if HAS_TORCH:
+                        checkpoint = torch.load(str(self.model_path), map_location=self.device)
+                        self.model = MobileNetV3NutrientModel(num_classes=4).to(self.device)
+                        if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+                            self.model.load_state_dict(checkpoint['model_state_dict'])
+                        elif isinstance(checkpoint, dict):
+                            self.model.load_state_dict(checkpoint)
+                        self.model.eval()
+                    else:
+                        raise tf_err
+                print("[NutrientPredictionService] Loaded nutrient model successfully")
             except Exception as e:
                 print(f"[NutrientPredictionService] Error loading nutrient model: {e}")
                 self.model = None
-        else:
-            print(f"[NutrientPredictionService] Model file not found at '{self.model_path}'.")
-            self.model = None
 
     def predict_image(self, image_bytes: bytes) -> dict:
-        """
-        Input: Plant leaf image bytes
-        Output: JSON matching specification:
-        {
-          "condition": "Nitrogen Deficiency",
-          "confidence": 0.91,
-          "recommendation": "Increase nitrogen availability and monitor leaf color."
-        }
-        """
         try:
             image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
         except Exception as e:
             raise ValueError(f"Invalid image content: {str(e)}")
 
         if self.model is not None:
-            tensor = self.transform(image).unsqueeze(0).to(self.device)
-            with torch.no_grad():
-                logits = self.model(tensor)
-                probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+            if HAS_TORCH and hasattr(self.model, 'forward'):
+                tensor = self.transform(image).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    logits = self.model(tensor)
+                    probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+                    pred_idx = int(np.argmax(probs))
+                    confidence = float(probs[pred_idx])
+                    raw_class = CLASS_NAMES[pred_idx]
+            else:
+                img_resized = image.resize((224, 224))
+                arr = np.array(img_resized, dtype=np.float32) / 255.0
+                arr = np.expand_dims(arr, axis=0)
+                probs = self.model.predict(arr)[0]
                 pred_idx = int(np.argmax(probs))
                 confidence = float(probs[pred_idx])
                 raw_class = CLASS_NAMES[pred_idx]
         else:
-            # Color analysis heuristic fallback if model checkpoint missing
             img_arr = np.array(image.resize((100, 100)), dtype=float)
             r = np.mean(img_arr[:, :, 0])
             g = np.mean(img_arr[:, :, 1])
@@ -133,10 +128,10 @@ class NutrientPredictionService:
             if g > r * 1.15 and g > b * 1.15:
                 raw_class = 'healthy'
                 confidence = 0.92
-            elif r > g * 0.95: # Yellowing chlorosis
+            elif r > g * 0.95:
                 raw_class = 'nitrogen_deficiency'
                 confidence = 0.90
-            elif b > g * 0.7: # Dark purple/brownish edges
+            elif b > g * 0.7:
                 raw_class = 'phosphorus_deficiency'
                 confidence = 0.88
             else:
@@ -152,5 +147,4 @@ class NutrientPredictionService:
             "recommendation": recommendation
         }
 
-# Global singleton instance
 nutrient_service = NutrientPredictionService()
