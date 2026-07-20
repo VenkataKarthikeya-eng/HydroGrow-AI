@@ -6,30 +6,20 @@ from PIL import Image
 import numpy as np
 
 try:
-    import torch
-    import torchvision.transforms as T
-    import torchvision.models as models
-    HAS_TORCH = True
-    class MobileNetV3CropValidator(torch.nn.Module):
-        def __init__(self, num_classes=3):
-            super().__init__()
-            self.backbone = models.mobilenet_v3_small(weights=None)
-            in_features = self.backbone.classifier[0].in_features
-            self.backbone.classifier = torch.nn.Sequential(
-                torch.nn.Linear(in_features, 128),
-                torch.nn.Hardswish(),
-                torch.nn.Dropout(p=0.3),
-                torch.nn.Linear(128, num_classes)
-            )
-
-        def forward(self, x):
-            return self.backbone(x)
+    import tensorflow as tf
+    HAS_TF = True
 except ImportError:
-    torch = None
-    T = None
-    models = None
-    HAS_TORCH = False
-    MobileNetV3CropValidator = None
+    tf = None
+    HAS_TF = False
+
+try:
+    import os as _os
+    _os.environ['KERAS_BACKEND'] = 'torch'
+    import keras
+    HAS_KERAS = True
+except Exception:
+    keras = None
+    HAS_KERAS = False
 
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
@@ -46,47 +36,21 @@ CONFIDENCE_THRESHOLD = 0.90
 class CropValidationService:
     def __init__(self, model_path: Path = MODEL_PATH):
         self.model_path = Path(model_path)
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') if HAS_TORCH else 'cpu'
         self.model = None
-        if HAS_TORCH:
-            self.transform = T.Compose([
-                T.Resize((224, 224)),
-                T.ToTensor(),
-                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-            ])
-        else:
-            self.transform = None
         self._load_model()
 
     def _load_model(self):
-        print(f"[CropValidationService] Checking model: {self.model_path}")
-        print(f"Exists: {self.model_path.exists()}")
-
         if self.model_path.exists():
             try:
-                try:
-                    import tensorflow as tf
-                    self.model = tf.keras.models.load_model(str(self.model_path))
-                except Exception as tf_err:
-                    if HAS_TORCH:
-                        checkpoint = torch.load(str(self.model_path), map_location=self.device)
-                        backbone = models.mobilenet_v3_small(weights=None)
-                        in_features = backbone.classifier[0].in_features
-                        backbone.classifier = torch.nn.Sequential(
-                            torch.nn.Linear(in_features, 128),
-                            torch.nn.Hardswish(),
-                            torch.nn.Dropout(p=0.3),
-                            torch.nn.Linear(128, 3)
-                        )
-                        self.model = backbone.to(self.device)
-                        if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-                            self.model.load_state_dict(checkpoint['model_state_dict'])
-                        elif isinstance(checkpoint, dict):
-                            self.model.load_state_dict(checkpoint)
-                        self.model.eval()
-                    else:
-                        raise tf_err
-                print("[CropValidationService] Loaded crop model successfully")
+                if HAS_TF:
+                    self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
+                    print("[CropValidationService] Loaded crop model successfully")
+                elif HAS_KERAS:
+                    self.model = keras.models.load_model(str(self.model_path), compile=False)
+                    print("[CropValidationService] Loaded crop model successfully")
+                else:
+                    print(f"[CropValidationService] Neither TensorFlow nor Keras is available to load {self.model_path}")
+                    self.model = None
             except Exception as e:
                 print(f"[CropValidationService] Error loading crop model: {e}")
                 self.model = None
@@ -114,42 +78,23 @@ class CropValidationService:
         is_grayscale = float(np.mean(np.abs(r - g) + np.abs(g - b))) < 15.0
 
         if self.model is not None:
-            if HAS_TORCH and hasattr(self.model, 'forward'):
-                tensor = self.transform(image).unsqueeze(0).to(self.device)
-                with torch.no_grad():
-                    logits = self.model(tensor)
-                    probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
-                    pred_idx = int(np.argmax(probs))
-                    confidence = float(probs[pred_idx])
-                    predicted_class = CLASS_NAMES[pred_idx]
-            else:
+            try:
                 img_resized = image.resize((224, 224))
                 arr = np.array(img_resized, dtype=np.float32) / 255.0
                 arr = np.expand_dims(arr, axis=0)
-                probs = self.model.predict(arr)[0]
+                preds = self.model(arr, training=False) if callable(self.model) else self.model.predict(arr)
+                probs = preds[0].numpy() if hasattr(preds[0], 'numpy') else np.array(preds[0])
                 pred_idx = int(np.argmax(probs))
                 confidence = float(probs[pred_idx])
+                if confidence < 0 or confidence > 1:
+                    exp = np.exp(probs - np.max(probs))
+                    p = exp / np.sum(exp)
+                    confidence = float(p[pred_idx])
                 predicted_class = CLASS_NAMES[pred_idx]
-
-            if is_grayscale or plant_ratio < 0.005:
-                predicted_class = 'non_leaf'
-                confidence = max(confidence, 0.96)
-            elif green_ratio < 0.06:
-                predicted_class = 'other_plant_leaf'
-                confidence = max(confidence, 0.94)
-            elif green_ratio >= 0.06:
-                predicted_class = 'lettuce_leaf'
-                confidence = max(confidence, 0.95)
+            except Exception:
+                predicted_class, confidence = self._cv_fallback(is_grayscale, plant_ratio, green_ratio)
         else:
-            if is_grayscale or plant_ratio < 0.005:
-                predicted_class = 'non_leaf'
-                confidence = 0.96
-            elif green_ratio < 0.06:
-                predicted_class = 'other_plant_leaf'
-                confidence = 0.94
-            else:
-                predicted_class = 'lettuce_leaf'
-                confidence = 0.95
+            predicted_class, confidence = self._cv_fallback(is_grayscale, plant_ratio, green_ratio)
 
         confidence = round(confidence, 2)
 
@@ -181,5 +126,17 @@ class CropValidationService:
                 "class": "non_leaf",
                 "confidence": confidence
             }
+
+    def _cv_fallback(self, is_grayscale, plant_ratio, green_ratio):
+        if is_grayscale or plant_ratio < 0.005:
+            predicted_class = 'non_leaf'
+            confidence = 0.96
+        elif green_ratio < 0.06:
+            predicted_class = 'other_plant_leaf'
+            confidence = 0.94
+        else:
+            predicted_class = 'lettuce_leaf'
+            confidence = 0.95
+        return predicted_class, confidence
 
 crop_validation_service = CropValidationService()
