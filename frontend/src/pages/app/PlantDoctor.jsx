@@ -1,52 +1,45 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Camera, Upload, ShieldCheck, AlertCircle, XCircle, RefreshCw, Sprout, TestTube, Sparkles } from 'lucide-react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Badge from '../../components/ui/Badge';
 import Loader from '../../components/ui/Loader';
-
-const API_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+import { plantDoctorApi } from '../../services/plantDoctorApi';
 
 export default function PlantDoctor() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [loadingStatus, setLoadingStatus] = useState('Uploading image...');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [rejectionInfo, setRejectionInfo] = useState(null);
   const [error, setError] = useState(null);
 
   const analyzeImageFile = async (file) => {
     setLoading(true);
+    setLoadingStatus('Uploading image...');
     setError(null);
     setRejectionInfo(null);
     setAnalysisResult(null);
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const response = await axios.post(`${API_URL}/api/vision/plant-analysis`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      setLoadingStatus('AI analyzing with TensorFlow models...');
+      const data = await plantDoctorApi.analyzePlantCombined(file);
 
-      if (response.data?.status === 'rejected') {
-        setRejectionInfo(response.data);
-      } else if (response.data?.error) {
-        setError(response.data.error);
+      if (data?.status === 'rejected') {
+        setRejectionInfo(data);
+      } else if (data?.error) {
+        setError(data.error);
       } else {
-        setAnalysisResult(response.data);
+        setAnalysisResult(data);
       }
     } catch (err) {
       console.error('Plant Doctor API error:', err);
-      const resData = err.response?.data;
-      if (resData?.status === 'rejected') {
-        setRejectionInfo(resData);
+      if (err?.status === 'rejected') {
+        setRejectionInfo(err);
       } else {
-        const msg = resData?.error || resData?.reason || resData?.detail || err.message || 'Failed to connect to HydroGrow AI backend.';
-        setError(`AI Scanner Error: ${msg}. Please verify backend server is active at ${API_URL}.`);
+        const msg = err?.reason || err?.detail || err?.message || 'Failed to connect to HydroGrow AI backend.';
+        setError(`AI Scanner Error: ${msg}. Please verify backend server is active.`);
       }
     } finally {
       setLoading(false);
@@ -127,7 +120,7 @@ export default function PlantDoctor() {
         </p>
       </div>
 
-      {/* Rejection Card (Part 6 Requirement) */}
+      {/* Rejection Card */}
       {rejectionInfo && !loading && (
         <Card padding="p-8" className="border-red-300 bg-red-50/90 dark:bg-red-950/50 dark:border-red-900 shadow-md">
           <div className="flex items-start gap-4">
@@ -220,19 +213,20 @@ export default function PlantDoctor() {
       {loading && (
         <Card padding="p-12">
           <Loader
-            message="Analyzing leaf with HydroGrow AI models..."
+            message={loadingStatus}
             steps={[
+              'Uploading image...',
+              'AI analyzing...',
               'Running Crop Identity Validation Gatekeeper...',
-              'Evaluating foliage chlorosis & growth day metrics...',
-              'Running Model 1 (Growth) & Model 2 (Nutrient) inference...',
+              'Evaluating Growth Stage & Nutrient Deficiency...',
               'Compiling tailored agronomist advice...',
             ]}
-            currentStep={2}
+            currentStep={1}
           />
         </Card>
       )}
 
-      {/* Scan Results Card (Only rendered when validation passes) */}
+      {/* Scan Results Card */}
       {analysisResult && !rejectionInfo && !loading && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -277,7 +271,7 @@ export default function PlantDoctor() {
 
               <div className="pt-6 border-t border-white/30 flex justify-between items-center">
                 <span className="text-xs text-white/90">
-                  Dual Model Scan: EfficientNetB0 + MobileNetV3
+                  Render Production FastAPI API: https://hydrogrow-ai-plant-doctor.onrender.com
                 </span>
                 <Button variant="secondary" size="sm" onClick={handleReset} icon={RefreshCw} className="bg-white text-slate-900 hover:bg-slate-100">
                   Scan Another Leaf
@@ -293,7 +287,7 @@ export default function PlantDoctor() {
             {/* 🌱 Growth Intelligence Card (Model 1) */}
             <Card padding="p-6">
               <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <Sprout className="w-4 h-4" /> 🌱 Growth Intelligence (Model 1)
+                <Sprout className="w-4 h-4" /> 🌱 Growth Analysis
               </div>
               
               <div className="space-y-3 text-sm">
@@ -307,12 +301,12 @@ export default function PlantDoctor() {
                 <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800/60">
                   <span className="text-slate-600 dark:text-slate-400 font-medium">Growth Day</span>
                   <span className="font-bold text-slate-900 dark:text-white">
-                    {analysisResult.growth_prediction?.growth_day} Days
+                    Day {analysisResult.growth_prediction?.growth_day}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Model 1 Confidence</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Model Confidence</span>
                   <span className="font-bold text-emerald-600 dark:text-emerald-400">
                     {formatConfidence(analysisResult.growth_prediction?.confidence)}
                   </span>
@@ -323,12 +317,12 @@ export default function PlantDoctor() {
             {/* 🧪 Nutrient Intelligence Card (Model 2) */}
             <Card padding="p-6">
               <div className="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
-                <TestTube className="w-4 h-4" /> 🧪 Nutrient Intelligence (Model 2)
+                <TestTube className="w-4 h-4" /> 🧪 Nutrient Analysis
               </div>
               
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800/60">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Condition</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Detected Deficiency</span>
                   <span className={`font-bold px-3 py-1 rounded-lg border ${
                     analysisResult.nutrient_prediction?.condition === 'Healthy'
                       ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
@@ -338,8 +332,15 @@ export default function PlantDoctor() {
                   </span>
                 </div>
 
+                <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800/60">
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Nutrient Status</span>
+                  <span className="font-bold text-slate-900 dark:text-white">
+                    {analysisResult.nutrient_prediction?.condition === 'Healthy' ? 'Optimal Balance' : 'Action Required'}
+                  </span>
+                </div>
+
                 <div className="flex justify-between items-center">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Model 2 Confidence</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">Model Confidence</span>
                   <span className="font-bold text-indigo-600 dark:text-indigo-400">
                     {formatConfidence(analysisResult.nutrient_prediction?.confidence)}
                   </span>
@@ -352,7 +353,7 @@ export default function PlantDoctor() {
           {/* 🤖 AI Recommendation Card */}
           <Card padding="p-6">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3">
-              <Sparkles className="w-4 h-4 text-emerald-500" /> 🤖 AI Agronomist Recommendation
+              <Sparkles className="w-4 h-4 text-emerald-500" /> 🤖 Suggested Actions & Plant Care Advice
             </div>
             <p className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed font-medium">
               {analysisResult.recommendation}

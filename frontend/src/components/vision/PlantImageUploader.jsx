@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import client from '../../api/client';
+import { plantDoctorApi } from '../../services/plantDoctorApi';
 import { UploadCloud, ShieldAlert } from 'lucide-react';
 
 function PlantImageUploader({ onAnalysisComplete }) {
@@ -61,25 +61,18 @@ function PlantImageUploader({ onAnalysisComplete }) {
     setProgress(20);
     setError('');
 
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
       setProgress(50);
-      const res = await client.post('/api/vision/analyze', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      const data = await plantDoctorApi.analyzePlantCombined(file);
       setProgress(100);
       setTimeout(() => {
         setUploading(false);
         setFile(null);
         setPreviewUrl(null);
-        if (onAnalysisComplete) onAnalysisComplete(res.data);
+        if (onAnalysisComplete) onAnalysisComplete(data);
       }, 500);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to analyze crop image.');
+      setError(err.reason || err.detail || err.message || 'Failed to analyze crop image.');
       setUploading(false);
     }
   };
