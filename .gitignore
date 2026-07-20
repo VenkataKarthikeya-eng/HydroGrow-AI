@@ -22,3 +22,4 @@ data/crop_validator_dataset/
 
 # Training outputs
 *.keras
+!ai_backend/ml_models/*.keras

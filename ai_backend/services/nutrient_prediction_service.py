@@ -29,22 +29,23 @@ except ImportError:
     HAS_TORCH = False
     MobileNetV3NutrientModel = None
 
+from pathlib import Path
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, ".."))
 
 def get_nutrient_model_path():
     filename = "nutrient_model.keras"
     candidates = [
-        os.path.join(PROJECT_ROOT, "ml_models", filename),
-        os.path.join(PROJECT_ROOT, "backend", "ml_models", filename),
-        os.path.join(BASE_DIR, "..", "ml_models", filename),
-        os.path.join("ml_models", filename),
-        os.path.join("backend", "ml_models", filename),
+        Path("/app/ml_models") / filename,
+        Path(PROJECT_ROOT) / "ml_models" / filename,
+        Path(BASE_DIR).parent / "ml_models" / filename,
+        Path("ml_models") / filename,
     ]
     for c in candidates:
-        if os.path.exists(c):
-            return os.path.normpath(c)
-    return os.path.join(PROJECT_ROOT, "ml_models", filename)
+        if c.exists():
+            return str(c)
+    return str(Path("/app/ml_models") / filename)
 
 MODEL_PATH = get_nutrient_model_path()
 
