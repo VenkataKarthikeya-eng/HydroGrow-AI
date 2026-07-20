@@ -30,20 +30,21 @@ except ImportError:
     MobileNetV3CropValidator = None
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, "..", ".."))
+PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, ".."))
 
 def get_crop_validator_model_path():
     filename = "crop_validator_model.keras"
     candidates = [
-        os.path.join(PROJECT_ROOT, "backend", "ml_models", filename),
         os.path.join(PROJECT_ROOT, "ml_models", filename),
-        os.path.join("backend", "ml_models", filename),
+        os.path.join(PROJECT_ROOT, "backend", "ml_models", filename),
+        os.path.join(BASE_DIR, "..", "ml_models", filename),
         os.path.join("ml_models", filename),
+        os.path.join("backend", "ml_models", filename),
     ]
     for c in candidates:
         if os.path.exists(c):
             return os.path.normpath(c)
-    return os.path.join(PROJECT_ROOT, "backend", "ml_models", filename)
+    return os.path.join(PROJECT_ROOT, "ml_models", filename)
 
 MODEL_PATH = get_crop_validator_model_path()
 
@@ -89,7 +90,7 @@ class CropValidationService:
                 print(f"[CropValidationService] Error loading model artifact: {e}")
                 self.model = None
         else:
-            print(f"[CropValidationService] Model file not found at '{self.model_path}'.")
+            print(f"[CropValidationService] Model file check: using computer vision analyzer or missing model path '{self.model_path}'.")
             self.model = None
 
     def validate_crop_image(self, image_bytes: bytes) -> dict:

@@ -1,11 +1,18 @@
 import os
 import sys
 import io
-import torch
-import torchvision.transforms as T
-import torchvision.models as models
 from PIL import Image
 import numpy as np
+try:
+    import torch
+    import torchvision.transforms as T
+    import torchvision.models as models
+    HAS_TORCH = True
+except ImportError:
+    torch = None
+    T = None
+    models = None
+    HAS_TORCH = False
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, "..", ".."))
@@ -15,17 +22,20 @@ MODEL_PATH = os.path.join(PROJECT_ROOT, "backend", "ml_models", "leaf_validator_
 class LeafValidationService:
     def __init__(self, model_path: str = MODEL_PATH):
         self.model_path = model_path
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') if HAS_TORCH else 'cpu'
         self.model = None
-        self.transform = T.Compose([
-            T.Resize((224, 224)),
-            T.ToTensor(),
-            T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-        ])
+        if HAS_TORCH:
+            self.transform = T.Compose([
+                T.Resize((224, 224)),
+                T.ToTensor(),
+                T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            ])
+        else:
+            self.transform = None
         self._load_model()
 
     def _load_model(self):
-        if os.path.exists(self.model_path):
+        if HAS_TORCH and os.path.exists(self.model_path):
             try:
                 checkpoint = torch.load(self.model_path, map_location=self.device)
                 
