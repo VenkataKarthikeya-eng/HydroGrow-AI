@@ -12,11 +12,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
-COPY ai_backend/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ai_backend/ml_models ./ml_models
-COPY ai_backend .
+COPY ml_models ./ml_models
+COPY . .
 
 EXPOSE 8000
 
