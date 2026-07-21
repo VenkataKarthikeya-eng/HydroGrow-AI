@@ -108,38 +108,28 @@ class NutrientPredictionService:
           "recommendation": "Increase nitrogen availability and monitor leaf color."
         }
         """
+        if not image_bytes or len(image_bytes) == 0:
+            raise ValueError("Empty image payload provided.")
+
         try:
             image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
         except Exception as e:
             raise ValueError(f"Invalid image content: {str(e)}")
 
         if self.model is not None:
-            tensor = self.transform(image).unsqueeze(0).to(self.device)
-            with torch.no_grad():
-                logits = self.model(tensor)
-                probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
-                pred_idx = int(np.argmax(probs))
-                confidence = float(probs[pred_idx])
-                raw_class = CLASS_NAMES[pred_idx]
+            try:
+                tensor = self.transform(image).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    logits = self.model(tensor)
+                    probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+                    pred_idx = int(np.argmax(probs))
+                    confidence = float(probs[pred_idx])
+                    raw_class = CLASS_NAMES[pred_idx]
+            except Exception as e:
+                print(f"[NutrientPredictionService] Inference error, falling back to color heuristics: {e}")
+                raw_class, confidence = self._heuristic_fallback(image)
         else:
-            # Color analysis heuristic fallback if model checkpoint missing
-            img_arr = np.array(image.resize((100, 100)), dtype=float)
-            r = np.mean(img_arr[:, :, 0])
-            g = np.mean(img_arr[:, :, 1])
-            b = np.mean(img_arr[:, :, 2])
-            
-            if g > r * 1.15 and g > b * 1.15:
-                raw_class = 'healthy'
-                confidence = 0.92
-            elif r > g * 0.95: # Yellowing chlorosis
-                raw_class = 'nitrogen_deficiency'
-                confidence = 0.90
-            elif b > g * 0.7: # Dark purple/brownish edges
-                raw_class = 'phosphorus_deficiency'
-                confidence = 0.88
-            else:
-                raw_class = 'potassium_deficiency'
-                confidence = 0.89
+            raw_class, confidence = self._heuristic_fallback(image)
 
         display_condition = CONDITION_DISPLAY_NAMES.get(raw_class, raw_class)
         recommendation = RECOMMENDATIONS.get(raw_class, "Maintain current nutrient schedule.")
@@ -149,6 +139,27 @@ class NutrientPredictionService:
             "confidence": round(confidence, 2),
             "recommendation": recommendation
         }
+
+    def _heuristic_fallback(self, image: Image.Image):
+        img_arr = np.array(image.resize((100, 100)), dtype=float)
+        r = np.mean(img_arr[:, :, 0])
+        g = np.mean(img_arr[:, :, 1])
+        b = np.mean(img_arr[:, :, 2])
+        
+        if g > r * 1.15 and g > b * 1.15:
+            raw_class = 'healthy'
+            confidence = 0.92
+        elif r > g * 0.95: # Yellowing chlorosis
+            raw_class = 'nitrogen_deficiency'
+            confidence = 0.90
+        elif b > g * 0.7: # Dark purple/brownish edges
+            raw_class = 'phosphorus_deficiency'
+            confidence = 0.88
+        else:
+            raw_class = 'potassium_deficiency'
+            confidence = 0.89
+
+        return raw_class, confidence
 
 # Global singleton instance
 nutrient_service = NutrientPredictionService()

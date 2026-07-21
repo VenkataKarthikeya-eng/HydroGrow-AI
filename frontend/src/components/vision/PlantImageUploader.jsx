@@ -72,7 +72,11 @@ function PlantImageUploader({ onAnalysisComplete }) {
         if (onAnalysisComplete) onAnalysisComplete(data);
       }, 500);
     } catch (err) {
-      setError(err.reason || err.detail || err.message || 'Failed to analyze crop image.');
+      const msg = (typeof err?.reason === 'string' && err.reason) ||
+                  (typeof err?.detail === 'string' && err.detail) ||
+                  (typeof err?.message === 'string' && err.message) ||
+                  'Failed to analyze crop image.';
+      setError(msg);
       setUploading(false);
     }
   };

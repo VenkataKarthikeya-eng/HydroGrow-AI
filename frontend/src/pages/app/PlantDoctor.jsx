@@ -10,26 +10,44 @@ export default function PlantDoctor() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [loadingStatus, setLoadingStatus] = useState('Uploading image...');
   const [analysisResult, setAnalysisResult] = useState(null);
   const [rejectionInfo, setRejectionInfo] = useState(null);
   const [error, setError] = useState(null);
 
+  const loaderSteps = [
+    'Uploading image...',
+    'AI analyzing with computer vision models...',
+    'Running Crop Identity Validation Gatekeeper...',
+    'Evaluating Growth Stage & Nutrient Deficiency...',
+    'Compiling tailored agronomist advice...'
+  ];
+
   const analyzeImageFile = async (file) => {
     setLoading(true);
-    setLoadingStatus('Uploading image...');
+    setCurrentStep(0);
+    setLoadingStatus(loaderSteps[0]);
     setError(null);
     setRejectionInfo(null);
     setAnalysisResult(null);
 
+    // Step progression timer for continuous visual feedback
+    const stepInterval = setInterval(() => {
+      setCurrentStep((prev) => {
+        const next = prev < loaderSteps.length - 1 ? prev + 1 : prev;
+        setLoadingStatus(loaderSteps[next]);
+        return next;
+      });
+    }, 450);
+
     try {
-      setLoadingStatus('AI analyzing with TensorFlow models...');
       const data = await plantDoctorApi.analyzePlantCombined(file);
 
       if (data?.status === 'rejected') {
         setRejectionInfo(data);
       } else if (data?.error) {
-        setError(data.error);
+        setError(typeof data.error === 'string' ? data.error : JSON.stringify(data.error));
       } else {
         setAnalysisResult(data);
       }
@@ -37,23 +55,43 @@ export default function PlantDoctor() {
       console.error('Plant Doctor API error:', err);
       if (err?.status === 'rejected') {
         setRejectionInfo(err);
+      } else if (err?.code === 'ECONNABORTED' || err?.reason?.includes('timeout')) {
+        setError('API Request Timeout: The AI server took too long to respond (30s limit). Please try again.');
       } else {
-        const msg = err?.reason || err?.detail || err?.message || 'Failed to connect to HydroGrow AI backend.';
+        const msg = (typeof err?.reason === 'string' && err.reason) ||
+                    (typeof err?.detail === 'string' && err.detail) ||
+                    (typeof err?.message === 'string' && err.message) ||
+                    'Failed to connect to HydroGrow AI backend.';
         setError(`AI Scanner Error: ${msg}. Please verify backend server is active.`);
       }
     } finally {
+      clearInterval(stepInterval);
       setLoading(false);
     }
   };
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
-      analyzeImageFile(file);
+    if (!file) return;
+
+    // File Size Validation (Max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setError('File is too large. Maximum allowed image size is 5 MB.');
+      return;
     }
+
+    // MIME Type Validation
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (!validTypes.includes(file.type.toLowerCase())) {
+      setError('Invalid file format. Please upload a JPG, JPEG, or PNG lettuce leaf image.');
+      return;
+    }
+
+    setSelectedImage(file);
+    const previewUrl = URL.createObjectURL(file);
+    setPreview(previewUrl);
+    analyzeImageFile(file);
   };
 
   const handleDemoImage = () => {
@@ -83,10 +121,16 @@ export default function PlantDoctor() {
         setPreview(URL.createObjectURL(file));
         analyzeImageFile(file);
       }
+      // Memory cleanup
+      canvas.width = 0;
+      canvas.height = 0;
     }, "image/png");
   };
 
   const handleReset = () => {
+    if (preview && preview.startsWith('blob:')) {
+      URL.revokeObjectURL(preview);
+    }
     setSelectedImage(null);
     setPreview(null);
     setAnalysisResult(null);
@@ -102,6 +146,14 @@ export default function PlantDoctor() {
       return `${Math.round(num * 100)}%`;
     }
     return `${Math.round(num)}%`;
+  };
+
+  const getConfidenceBadgeColor = (conf) => {
+    const num = typeof conf === 'number' ? conf : parseFloat(conf || 0);
+    const val = num <= 1.0 ? num * 100 : num;
+    if (val >= 90) return 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40';
+    if (val >= 75) return 'bg-amber-500/20 text-amber-300 border-amber-400/40';
+    return 'bg-rose-500/20 text-rose-300 border-rose-400/40';
   };
 
   return (
@@ -139,6 +191,9 @@ export default function PlantDoctor() {
                 <p className="text-sm font-semibold text-red-900 dark:text-red-200 leading-relaxed">
                   {rejectionInfo.reason || "Please upload a hydroponic lettuce leaf image for AI analysis."}
                 </p>
+              </div>
+              <div className="p-3 rounded-lg bg-red-100/70 dark:bg-red-900/40 text-xs text-red-800 dark:text-red-300">
+                💡 <span className="font-bold">Tip for optimal scan accuracy:</span> Ensure your leaf photo is well-lit, clearly in focus, and centered against a neutral background.
               </div>
               <div className="pt-2 flex items-center gap-3">
                 <Button size="sm" variant="primary" onClick={handleReset} icon={RefreshCw} className="bg-red-600 hover:bg-red-700 text-white">
@@ -192,7 +247,7 @@ export default function PlantDoctor() {
             </Button>
           </div>
 
-          <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80 grid grid-cols-3 gap-4 text-xs text-slate-500">
+          <div className="pt-6 border-t border-slate-100 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-slate-500">
             <div>
               <span className="font-bold text-slate-700 dark:text-slate-300 block mb-0.5">Gatekeeper</span>
               Crop Identity Validation AI
@@ -214,14 +269,8 @@ export default function PlantDoctor() {
         <Card padding="p-12">
           <Loader
             message={loadingStatus}
-            steps={[
-              'Uploading image...',
-              'AI analyzing...',
-              'Running Crop Identity Validation Gatekeeper...',
-              'Evaluating Growth Stage & Nutrient Deficiency...',
-              'Compiling tailored agronomist advice...',
-            ]}
-            currentStep={1}
+            steps={loaderSteps}
+            currentStep={currentStep}
           />
         </Card>
       )}
@@ -247,21 +296,21 @@ export default function PlantDoctor() {
             </Card>
 
             {/* Health Overview Banner */}
-            <div className={`md:col-span-2 saas-card p-8 text-white rounded-2xl flex flex-col justify-between shadow-lg ${
+            <div className={`md:col-span-2 saas-card p-6 sm:p-8 text-white rounded-2xl flex flex-col justify-between shadow-lg ${
               analysisResult.nutrient_prediction?.condition === 'Healthy'
                 ? 'bg-emerald-600'
                 : 'bg-amber-600'
             }`}>
               <div>
-                <div className="flex items-center justify-between">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 text-white/90 text-xs font-bold uppercase tracking-wider">
                     <ShieldCheck className="w-5 h-5" /> Combined AI Diagnostics
                   </div>
-                  <Badge variant="brand" className="bg-white/20 text-white border-white/30">
+                  <Badge variant="brand" className={`px-2.5 py-1 text-xs font-bold border ${getConfidenceBadgeColor(analysisResult.nutrient_prediction?.confidence)}`}>
                     {formatConfidence(analysisResult.nutrient_prediction?.confidence)} Confidence
                   </Badge>
                 </div>
-                <div className="text-4xl font-black mt-3">
+                <div className="text-3xl sm:text-4xl font-black mt-3">
                   {analysisResult.nutrient_prediction?.condition || 'Analysis Complete'}
                 </div>
                 <p className="text-sm text-white/90 mt-2">
@@ -269,11 +318,11 @@ export default function PlantDoctor() {
                 </p>
               </div>
 
-              <div className="pt-6 border-t border-white/30 flex justify-between items-center">
-                <span className="text-xs text-white/90">
+              <div className="pt-6 border-t border-white/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <span className="text-xs text-white/80 font-medium">
                   Render Production FastAPI API: https://hydrogrow-ai-plant-doctor.onrender.com
                 </span>
-                <Button variant="secondary" size="sm" onClick={handleReset} icon={RefreshCw} className="bg-white text-slate-900 hover:bg-slate-100">
+                <Button variant="secondary" size="sm" onClick={handleReset} icon={RefreshCw} className="bg-white text-slate-900 hover:bg-slate-100 shrink-0">
                   Scan Another Leaf
                 </Button>
               </div>

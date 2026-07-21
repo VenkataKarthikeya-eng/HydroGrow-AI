@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 const BASE_URL = import.meta.env.VITE_AI_API_URL || import.meta.env.VITE_API_URL || 'https://hydrogrow-ai-plant-doctor.onrender.com';
+const TIMEOUT_MS = 30000; // 30 second timeout for model inference
 
 /**
  * Plant Doctor API Service for HydroGrow AI Render Backend Integration
@@ -20,11 +21,18 @@ export const plantDoctorApi = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: TIMEOUT_MS,
       });
       return response.data;
     } catch (error) {
       console.error('API Error /api/vision/plant-analysis:', error);
-      throw error.response?.data || { reason: error.message || 'Plant analysis failed.' };
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      if (error.code === 'ECONNABORTED') {
+        throw { code: 'ECONNABORTED', reason: 'Connection timeout while contacting AI prediction server.' };
+      }
+      throw { reason: error.message || 'Plant analysis failed due to network error.' };
     }
   },
 
@@ -42,11 +50,18 @@ export const plantDoctorApi = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: TIMEOUT_MS,
       });
       return response.data;
     } catch (error) {
       console.error('API Error /api/vision/predict-growth:', error);
-      throw error.response?.data || { reason: error.message || 'Growth prediction failed.' };
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      if (error.code === 'ECONNABORTED') {
+        throw { code: 'ECONNABORTED', reason: 'Connection timeout while predicting growth stage.' };
+      }
+      throw { reason: error.message || 'Growth prediction failed.' };
     }
   },
 
@@ -64,11 +79,18 @@ export const plantDoctorApi = {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
+        timeout: TIMEOUT_MS,
       });
       return response.data;
     } catch (error) {
       console.error('API Error /api/vision/predict-nutrient:', error);
-      throw error.response?.data || { reason: error.message || 'Nutrient analysis failed.' };
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      if (error.code === 'ECONNABORTED') {
+        throw { code: 'ECONNABORTED', reason: 'Connection timeout while evaluating nutrient deficiency.' };
+      }
+      throw { reason: error.message || 'Nutrient analysis failed.' };
     }
   },
 };

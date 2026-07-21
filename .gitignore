@@ -20,6 +20,14 @@ data/nutrient_dataset/
 data/leaf_validator_dataset/
 data/crop_validator_dataset/
 
-# Training outputs
+# Training outputs & Model Binaries
 *.keras
-!ai_backend/ml_models/*.keras
+
+# Virtual Environment
+venv/
+ai_backend/venv/
+.venv/
+
+# Logs & Cache
+*.log
+.pytest_cache/

@@ -35,8 +35,8 @@ MODEL_PATH = get_growth_model_path()
 STAGE_CLASSES = ['Seedling', 'Vegetative', 'Mature / Harvest']
 
 STAGE_RECOMMENDATIONS = {
-    'Seedling': "Maintain low EC (0.8–1.2 mS/cm), high humidity (65-75%), and light misting for delicate seedling roots.",
-    'Vegetative': "Continue nutrient schedule. Maintain EC (1.4–1.8 mS/cm) and pH (5.8–6.2) for rapid foliage expansion.",
+    'Seedling': "Maintain low EC (0.8-1.2 mS/cm), high humidity (65-75%), and light misting for delicate seedling roots.",
+    'Vegetative': "Continue nutrient schedule. Maintain EC (1.4-1.8 mS/cm) and pH (5.8-6.2) for rapid foliage expansion.",
     'Mature / Harvest': "Lettuce is in mature harvest window. Prepare for harvest within 3-5 days; monitor tipburn."
 }
 
@@ -117,42 +117,33 @@ class GrowthPredictionService:
           "recommendation": "Continue nutrient schedule"
         }
         """
+        if not image_bytes or len(image_bytes) == 0:
+            raise ValueError("Empty image payload provided.")
+
         try:
             image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
         except Exception as e:
             raise ValueError(f"Invalid image content: {str(e)}")
 
         if self.model is not None:
-            tensor = self.transform(image).unsqueeze(0).to(self.device)
-            with torch.no_grad():
-                logits, day_pred = self.model(tensor)
-                probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
-                pred_class_idx = int(np.argmax(probs))
-                confidence = float(probs[pred_class_idx])
-                predicted_stage = STAGE_CLASSES[pred_class_idx]
-                
-                # Growth day prediction
-                raw_day = float(day_pred.item())
-                min_d, max_d = STAGE_DAY_ESTIMATES[predicted_stage]
-                growth_day = int(np.clip(round(raw_day), min_d, max_d))
+            try:
+                tensor = self.transform(image).unsqueeze(0).to(self.device)
+                with torch.no_grad():
+                    logits, day_pred = self.model(tensor)
+                    probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+                    pred_class_idx = int(np.argmax(probs))
+                    confidence = float(probs[pred_class_idx])
+                    predicted_stage = STAGE_CLASSES[pred_class_idx]
+                    
+                    # Growth day prediction
+                    raw_day = float(day_pred.item())
+                    min_d, max_d = STAGE_DAY_ESTIMATES.get(predicted_stage, (1, 27))
+                    growth_day = int(np.clip(round(raw_day), min_d, max_d))
+            except Exception as e:
+                print(f"[GrowthPredictionService] Inference error, falling back to feature heuristics: {e}")
+                predicted_stage, growth_day, confidence = self._heuristic_fallback(image)
         else:
-            # Smart computer vision green-ratio estimator fallback
-            img_arr = np.array(image.resize((100, 100)), dtype=float)
-            green_mask = (img_arr[:, :, 1] > 60) & (img_arr[:, :, 1] > img_arr[:, :, 0] * 1.1) & (img_arr[:, :, 1] > img_arr[:, :, 2] * 1.1)
-            green_ratio = float(np.mean(green_mask))
-
-            if green_ratio < 0.02:
-                predicted_stage = 'Seedling'
-                growth_day = int(1 + (green_ratio / 0.02) * 9)
-                confidence = 0.91
-            elif green_ratio < 0.08:
-                predicted_stage = 'Vegetative'
-                growth_day = int(11 + ((green_ratio - 0.02) / 0.06) * 9)
-                confidence = 0.94
-            else:
-                predicted_stage = 'Mature / Harvest'
-                growth_day = int(21 + min(float(green_ratio - 0.08) * 50, 6.0))
-                confidence = 0.96
+            predicted_stage, growth_day, confidence = self._heuristic_fallback(image)
 
         recommendation = STAGE_RECOMMENDATIONS.get(predicted_stage, "Continue nutrient schedule.")
 
@@ -162,6 +153,26 @@ class GrowthPredictionService:
             "confidence": round(confidence, 2),
             "recommendation": recommendation
         }
+
+    def _heuristic_fallback(self, image: Image.Image):
+        img_arr = np.array(image.resize((100, 100)), dtype=float)
+        green_mask = (img_arr[:, :, 1] > 60) & (img_arr[:, :, 1] > img_arr[:, :, 0] * 1.1) & (img_arr[:, :, 1] > img_arr[:, :, 2] * 1.1)
+        green_ratio = float(np.mean(green_mask))
+
+        if green_ratio < 0.02:
+            predicted_stage = 'Seedling'
+            growth_day = int(1 + (green_ratio / 0.02) * 9)
+            confidence = 0.91
+        elif green_ratio < 0.08:
+            predicted_stage = 'Vegetative'
+            growth_day = int(11 + ((green_ratio - 0.02) / 0.06) * 9)
+            confidence = 0.94
+        else:
+            predicted_stage = 'Mature / Harvest'
+            growth_day = int(21 + min(float(green_ratio - 0.08) * 50, 6.0))
+            confidence = 0.96
+
+        return predicted_stage, growth_day, confidence
 
 # Global singleton instance
 growth_service = GrowthPredictionService()
