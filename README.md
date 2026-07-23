@@ -12,7 +12,7 @@
 ## 🌐 Live Deployment
 
 🚀 **Production Frontend:**  
-https://hydro-grow-nk7jbujib-venkatakarthikeya-engs-projects.vercel.app
+https://hydro-grow-ai.vercel.app
 
 
 📦 **GitHub Repository:**  
