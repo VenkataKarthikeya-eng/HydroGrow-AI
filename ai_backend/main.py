@@ -9,18 +9,15 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 
-# Ensure ai_backend directory and PROJECT_ROOT are on path
+# Ensure ai_backend directory is on path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, ".."))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
-if PROJECT_ROOT not in sys.path:
-    sys.path.insert(0, PROJECT_ROOT)
 
 from services.growth_prediction_service import growth_service
 from services.nutrient_prediction_service import nutrient_service
 from services.crop_validation_service import crop_validation_service
-from backend.api import assistant_routes
+from services.assistant_routes import router as assistant_router
 
 app = FastAPI(
     title="HydroGrow AI Plant Doctor Backend",
@@ -28,7 +25,7 @@ app = FastAPI(
     version="1.0.0"
 )
 
-app.include_router(assistant_routes.router)
+app.include_router(assistant_router)
 
 # Allowed origins for production & development
 origins = [
