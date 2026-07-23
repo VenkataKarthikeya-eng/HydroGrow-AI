@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const BASE_URL = import.meta.env.VITE_AI_API_URL || import.meta.env.VITE_API_URL || 'https://hydrogrow-ai-plant-doctor.onrender.com';
+const BASE_URL = (import.meta.env.VITE_AI_API_URL && import.meta.env.VITE_AI_API_URL.trim() !== '') 
+  ? import.meta.env.VITE_AI_API_URL 
+  : 'https://hydrogrow-ai-plant-doctor.onrender.com';
 const TIMEOUT_MS = 30000; // 30 second timeout for model inference
 
 /**
