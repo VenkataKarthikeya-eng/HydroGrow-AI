@@ -448,15 +448,13 @@ class HydroGrowAssistant:
                 recommendations=recommendation
             )
 
-        # FALLBACK RESPONSE
+        # FALLBACK RESPONSE FOR UNRELATED / OUT-OF-DOMAIN QUESTIONS
         return (
-            "I'm your **HydroGrow AI Assistant**. I can help you understand your lettuce fresh weight predictions, "
-            "optimize hydroponic settings, manage nutrients, and troubleshoot common cultivation issues.\n\n"
+            "I am specialized in hydroponics and crop management. "
+            "Please ask questions related to farming, nutrients, or plant health.\n\n"
             "Here are some examples of what you can ask me:\n"
+            "- *'What EC level is good for lettuce?'*\n"
             "- *'Why is my predicted growth low?'*\n"
-            "- *'How can I improve my lettuce yield?'*\n"
-            "- *'Explain what high water pH (7.2) does to lettuce.'*\n"
             "- *'How do I treat Pythium root rot?'*\n"
-            "- *'What are the vegetative growth stages?'*\n\n"
-            "Try asking one of the questions above!"
+            "- *'Explain what high water pH does to lettuce.'*"
         )

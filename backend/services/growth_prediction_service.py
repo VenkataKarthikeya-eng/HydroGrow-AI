@@ -147,6 +147,8 @@ class GrowthPredictionService:
 
         recommendation = STAGE_RECOMMENDATIONS.get(predicted_stage, "Continue nutrient schedule.")
 
+        print(f"[Growth Debug] stage={predicted_stage}, day={growth_day}, confidence={confidence:.4f}")
+
         return {
             "growth_stage": predicted_stage,
             "growth_day": growth_day,

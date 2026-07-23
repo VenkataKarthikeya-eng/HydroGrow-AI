@@ -146,13 +146,12 @@ class TestAIAssistant(unittest.TestCase):
         self.assertIn("Harvest Stage", res)
 
     def test_fallback_response(self):
-        """Verify that unrelated inputs return a clean fallback detailing assistant options."""
-        query = "What is the capital of Japan?"
+        """Verify that unrelated inputs return a polite hydroponics specialization notice."""
+        query = "What is the best car?"
         res = self.assistant.get_response(query, self.context)
         
-        self.assertIn("HydroGrow AI Assistant", res)
-        self.assertIn("optimize hydroponic settings", res)
-        self.assertIn("Why is my predicted growth low?", res)
+        self.assertIn("specialized in hydroponics", res.lower())
+        self.assertIn("farming, nutrients, or plant health", res.lower())
 
 
 if __name__ == "__main__":

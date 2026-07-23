@@ -134,6 +134,15 @@ class NutrientPredictionService:
         display_condition = CONDITION_DISPLAY_NAMES.get(raw_class, raw_class)
         recommendation = RECOMMENDATIONS.get(raw_class, "Maintain current nutrient schedule.")
 
+        print(f"[Nutrient Debug] condition={display_condition}, confidence={confidence:.4f}")
+
+        if confidence < 0.50:
+            return {
+                "condition": "Uncertain",
+                "confidence": round(confidence, 2),
+                "recommendation": "Low confidence. Please upload a clearer leaf image."
+            }
+
         return {
             "condition": display_condition,
             "confidence": round(confidence, 2),

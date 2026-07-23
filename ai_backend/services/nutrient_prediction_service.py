@@ -57,10 +57,10 @@ class NutrientPredictionService:
             try:
                 if HAS_TF:
                     self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
-                    print("[NutrientPredictionService] Loaded nutrient model successfully")
+                    print("Nutrient Model Loaded [OK]")
                 elif HAS_KERAS:
                     self.model = keras.models.load_model(str(self.model_path), compile=False)
-                    print("[NutrientPredictionService] Loaded nutrient model successfully")
+                    print("Nutrient Model Loaded [OK]")
                 else:
                     print(f"[NutrientPredictionService] Neither TensorFlow nor Keras is available to load {self.model_path}")
                     self.model = None
@@ -68,17 +68,44 @@ class NutrientPredictionService:
                 print(f"[NutrientPredictionService] Error loading nutrient model: {e}")
                 self.model = None
 
-    def predict_image(self, image_bytes: bytes) -> dict:
-        try:
-            image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-        except Exception as e:
-            raise ValueError(f"Invalid image content: {str(e)}")
+    def warm_up(self):
+        """Warm up TensorFlow model execution graph during startup."""
+        if self.model is not None:
+            try:
+                dummy = np.zeros((1, 224, 224, 3), dtype=np.float32)
+                _ = self.model(dummy, training=False) if callable(self.model) else self.model.predict(dummy)
+            except Exception as e:
+                print(f"[NutrientPrediction] Warm-up warning: {e}")
+
+    def predict_image(self, image_input, arr_input: np.ndarray = None) -> dict:
+        res, _ = self.predict_image_fast(image_input, arr_input)
+        return res
+
+    def predict_image_fast(self, image_input, arr_input: np.ndarray = None) -> tuple[dict, float]:
+        import time
+        t0 = time.perf_counter()
+
+        if isinstance(image_input, bytes):
+            try:
+                image = Image.open(io.BytesIO(image_input)).convert('RGB')
+            except Exception as e:
+                raise ValueError(f"Invalid image content: {str(e)}")
+        elif isinstance(image_input, Image.Image):
+            image = image_input
+        else:
+            image = None
 
         if self.model is not None:
             try:
-                img_resized = image.resize((224, 224))
-                arr = np.array(img_resized, dtype=np.float32) / 255.0
-                arr = np.expand_dims(arr, axis=0)
+                if arr_input is not None:
+                    arr = arr_input
+                elif image is not None:
+                    img_resized = image.resize((224, 224))
+                    arr = np.array(img_resized, dtype=np.float32) / 255.0
+                    arr = np.expand_dims(arr, axis=0)
+                else:
+                    arr = np.zeros((1, 224, 224, 3), dtype=np.float32)
+
                 preds = self.model(arr, training=False) if callable(self.model) else self.model.predict(arr)
                 probs = preds[0].numpy() if hasattr(preds[0], 'numpy') else np.array(preds[0])
                 pred_idx = int(np.argmax(probs))
@@ -95,12 +122,24 @@ class NutrientPredictionService:
 
         display_condition = CONDITION_DISPLAY_NAMES.get(raw_class, raw_class)
         recommendation = RECOMMENDATIONS.get(raw_class, "Maintain current nutrient schedule.")
+        t_elapsed = time.perf_counter() - t0
 
-        return {
-            "condition": display_condition,
-            "confidence": round(confidence, 2),
-            "recommendation": recommendation
-        }
+        print(f"[Nutrient Debug] condition={display_condition}, confidence={confidence:.4f}")
+
+        if confidence < 0.50:
+            result = {
+                "condition": "Uncertain",
+                "confidence": round(confidence, 2),
+                "recommendation": "Low confidence. Please upload a clearer leaf image."
+            }
+        else:
+            result = {
+                "condition": display_condition,
+                "confidence": round(confidence, 2),
+                "recommendation": recommendation
+            }
+
+        return result, t_elapsed
 
     def _cv_fallback(self, image):
         img_arr = np.array(image.resize((100, 100)), dtype=float)

@@ -201,6 +201,7 @@ def detect_intent(message: str, conversation_history: list) -> str:
     return IntentClassifier.classify_intent(message, resolved_query)
 
 @router.post("/api/chat", summary="Chat with the HydroGrow AI Assistant")
+@router.post("/chat", summary="Chat with the HydroGrow AI Assistant (alias)")
 async def chat_assistant(
     data: ChatInput,
     current_user: Optional[Any] = Depends(get_optional_current_user),
@@ -313,6 +314,7 @@ async def chat_assistant(
         )
 
 @router.post("/api/chat/stream", summary="Stream response from HydroGrow AI Assistant")
+@router.post("/chat/stream", summary="Stream response from HydroGrow AI Assistant (alias)")
 async def chat_assistant_stream(
     data: ChatInput,
     current_user: Optional[Any] = Depends(get_optional_current_user),
@@ -430,6 +432,7 @@ async def chat_assistant_stream(
         )
 
 @router.get("/api/chat/context", summary="Get user profile and active crop context")
+@router.get("/chat/context", summary="Get user profile and active crop context (alias)")
 def get_chat_context(
     current_user: Optional[Any] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)

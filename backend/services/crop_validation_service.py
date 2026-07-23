@@ -49,7 +49,7 @@ MODEL_PATH = get_crop_validator_model_path()
 
 CLASS_NAMES = ['lettuce_leaf', 'other_plant_leaf', 'non_leaf']
 
-CONFIDENCE_THRESHOLD = 0.90
+CONFIDENCE_THRESHOLD = 0.50
 
 class CropValidationService:
     def __init__(self, model_path: str = MODEL_PATH):
@@ -94,7 +94,7 @@ class CropValidationService:
 
     def validate_crop_image(self, image_bytes: bytes) -> dict:
         """
-        Production Crop Validation Gatekeeper (3-Class & 90% Confidence Guard).
+        Production Crop Validation Gatekeeper (3-Class & 50% Confidence Guard).
         """
         if not image_bytes or len(image_bytes) == 0:
             return {
@@ -138,37 +138,39 @@ class CropValidationService:
                     confidence = float(probs[pred_idx])
                     predicted_class = CLASS_NAMES[pred_idx]
                     
-                    # Direct validation checks
-                    if is_grayscale or plant_ratio < 0.01:
+                    # Direct validation checks: guard rules
+                    if is_grayscale or plant_ratio < 0.005:
                         predicted_class = 'non_leaf'
                         confidence = max(confidence, 0.96)
-                    elif green_ratio < 0.05:
+                    elif green_ratio < 0.06:
                         predicted_class = 'other_plant_leaf'
-                        confidence = max(confidence, 0.93)
-                    elif green_ratio >= 0.05:
-                        predicted_class = 'lettuce_leaf'
+                        confidence = max(confidence, 0.94)
+                    elif predicted_class == 'lettuce_leaf':
                         confidence = max(confidence, 0.95)
             except Exception as e:
                 print(f"[CropValidationService] Model inference error, using feature heuristics: {e}")
-                if is_grayscale or plant_ratio < 0.01:
+                if is_grayscale or plant_ratio < 0.005:
                     predicted_class = 'non_leaf'
                     confidence = 0.96
-                elif green_ratio < 0.05:
+                elif green_ratio < 0.06:
                     predicted_class = 'other_plant_leaf'
-                    confidence = 0.93
+                    confidence = 0.94
                 else:
                     predicted_class = 'lettuce_leaf'
                     confidence = 0.95
         else:
-            if is_grayscale or plant_ratio < 0.01:
+            if is_grayscale or plant_ratio < 0.005:
                 predicted_class = 'non_leaf'
                 confidence = 0.96
-            elif green_ratio < 0.05:
+            elif green_ratio < 0.06:
                 predicted_class = 'other_plant_leaf'
-                confidence = 0.93
+                confidence = 0.94
             else:
                 predicted_class = 'lettuce_leaf'
                 confidence = 0.95
+
+        # Debug logging (BUG 6)
+        print(f"[Crop Validation Debug] predicted_class={predicted_class}, confidence={confidence:.4f}, green_ratio={green_ratio:.4f}, foliage_ratio={plant_ratio:.4f}")
 
         confidence = round(confidence, 2)
 

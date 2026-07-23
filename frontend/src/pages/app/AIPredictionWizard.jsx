@@ -25,6 +25,7 @@ export default function AIPredictionWizard() {
   const [step, setStep] = useState(1); // 1: Input, 2: Analyzing, 3: Results
   const [formData, setFormData] = useState(predictionInputs);
   const [analysisStepIndex, setAnalysisStepIndex] = useState(0);
+  const [localError, setLocalError] = useState(null);
 
   const analysisSteps = [
     'Initializing machine learning model weights...',
@@ -46,6 +47,7 @@ export default function AIPredictionWizard() {
     e.preventDefault();
     setStep(2);
     setAnalysisStepIndex(0);
+    setLocalError(null);
 
     const interval = setInterval(() => {
       setAnalysisStepIndex((prev) => {
@@ -57,18 +59,19 @@ export default function AIPredictionWizard() {
 
     try {
       await runPrediction(formData);
-      setTimeout(() => {
-        clearInterval(interval);
-        setStep(3);
-      }, 3500);
+      setStep(3);
     } catch (err) {
-      clearInterval(interval);
+      console.error('Yield Prediction API Error:', err);
+      setLocalError('Prediction service unavailable. Please retry.');
       setStep(1);
+    } finally {
+      clearInterval(interval);
     }
   };
 
   const handleReset = () => {
     resetPrediction();
+    setLocalError(null);
     setStep(1);
   };
 
@@ -119,6 +122,19 @@ export default function AIPredictionWizard() {
       {/* STEP 1: INPUT FORM */}
       {step === 1 && (
         <form onSubmit={handleAnalyze} className="space-y-8">
+          {(localError || predictionError) && (
+            <Card padding="p-6" className="border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-900">
+              <div className="flex items-start gap-4">
+                <AlertTriangle className="w-6 h-6 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">System Notification</h4>
+                  <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                    {localError || predictionError || "Prediction service unavailable. Please retry."}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             
             {/* Column 1: Crop Info */}

@@ -278,6 +278,22 @@ export default function PlantDoctor() {
       {/* Scan Results Card */}
       {analysisResult && !rejectionInfo && !loading && (
         <div className="space-y-6">
+
+          {/* Low Confidence Warning Card (Bug 2) */}
+          {(analysisResult.nutrient_prediction?.condition === 'Uncertain' || (analysisResult.nutrient_prediction?.confidence != null && analysisResult.nutrient_prediction.confidence < 0.50)) && (
+            <Card padding="p-6" className="border-amber-300 bg-amber-50 dark:bg-amber-950/50 dark:border-amber-900 shadow-sm">
+              <div className="flex items-start gap-4">
+                <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">⚠️ Low Confidence Diagnostic Warning</h4>
+                  <p className="text-xs text-amber-800 dark:text-amber-300 font-medium">
+                    {analysisResult.nutrient_prediction?.recommendation || "Low confidence. Please upload a clearer leaf image."}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Image Preview */}
@@ -299,6 +315,8 @@ export default function PlantDoctor() {
             <div className={`md:col-span-2 saas-card p-6 sm:p-8 text-white rounded-2xl flex flex-col justify-between shadow-lg ${
               analysisResult.nutrient_prediction?.condition === 'Healthy'
                 ? 'bg-emerald-600'
+                : analysisResult.nutrient_prediction?.condition === 'Uncertain'
+                ? 'bg-amber-600'
                 : 'bg-amber-600'
             }`}>
               <div>
@@ -314,7 +332,7 @@ export default function PlantDoctor() {
                   {analysisResult.nutrient_prediction?.condition || 'Analysis Complete'}
                 </div>
                 <p className="text-sm text-white/90 mt-2">
-                  Growth Stage: <span className="font-bold">{analysisResult.growth_prediction?.stage}</span> (Day {analysisResult.growth_prediction?.growth_day})
+                  Growth Stage: <span className="font-bold">{analysisResult.growth_prediction?.stage || 'Unknown'}</span> (Day {analysisResult.growth_prediction?.growth_day ?? 'N/A'})
                 </p>
               </div>
 
@@ -343,14 +361,14 @@ export default function PlantDoctor() {
                 <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800/60">
                   <span className="text-slate-600 dark:text-slate-400 font-medium">Growth Stage</span>
                   <span className="font-bold text-slate-900 dark:text-white bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 px-3 py-1 rounded-lg border border-emerald-200 dark:border-emerald-800">
-                    {analysisResult.growth_prediction?.stage}
+                    {analysisResult.growth_prediction?.stage || 'Unknown'}
                   </span>
                 </div>
                 
                 <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800/60">
                   <span className="text-slate-600 dark:text-slate-400 font-medium">Growth Day</span>
                   <span className="font-bold text-slate-900 dark:text-white">
-                    Day {analysisResult.growth_prediction?.growth_day}
+                    Day {analysisResult.growth_prediction?.growth_day ?? 'N/A'}
                   </span>
                 </div>
 
@@ -377,7 +395,7 @@ export default function PlantDoctor() {
                       ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
                       : 'bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                   }`}>
-                    {analysisResult.nutrient_prediction?.condition}
+                    {analysisResult.nutrient_prediction?.condition || 'Unknown'}
                   </span>
                 </div>
 
@@ -405,7 +423,7 @@ export default function PlantDoctor() {
               <Sparkles className="w-4 h-4 text-emerald-500" /> 🤖 Suggested Actions & Plant Care Advice
             </div>
             <p className="text-sm text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-800 leading-relaxed font-medium">
-              {analysisResult.recommendation}
+              {analysisResult.recommendation || 'No recommendation available.'}
             </p>
           </Card>
 

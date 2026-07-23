@@ -24,11 +24,17 @@ except Exception:
 BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
 
-MODEL_PATH = Path("/app/ml_models/crop_validator_model.keras")
-if not MODEL_PATH.exists():
-    local_path = PROJECT_ROOT / "ml_models" / "crop_validator_model.keras"
-    if local_path.exists():
-        MODEL_PATH = local_path
+candidates = [
+    Path("/app/ml_models/crop_validator_model.keras"),
+    PROJECT_ROOT / "ml_models" / "crop_validator_model.keras",
+    PROJECT_ROOT.parent / "ml" / "models" / "crop_validator_model.keras",
+    PROJECT_ROOT / "ml" / "models" / "crop_validator_model.keras",
+]
+MODEL_PATH = candidates[0]
+for cand in candidates:
+    if cand.exists():
+        MODEL_PATH = cand
+        break
 
 CLASS_NAMES = ['lettuce_leaf', 'other_plant_leaf', 'non_leaf']
 CONFIDENCE_THRESHOLD = 0.50
@@ -53,10 +59,10 @@ class CropValidationService:
             try:
                 if HAS_TF:
                     self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
-                    print("[CropValidationService] Loaded crop model successfully")
+                    print("[Model Loader]\nCrop Validation Model Loaded [OK]")
                 elif HAS_KERAS:
                     self.model = keras.models.load_model(str(self.model_path), compile=False)
-                    print("[CropValidationService] Loaded crop model successfully")
+                    print("[Model Loader]\nCrop Validation Model Loaded [OK]")
                 else:
                     print(f"[CropValidationService] Neither TensorFlow nor Keras is available to load {self.model_path}")
                     self.model = None
@@ -64,20 +70,37 @@ class CropValidationService:
                 print(f"[CropValidationService] Error loading crop model: {e}")
                 self.model = None
 
-    def validate_crop_image(self, image_bytes: bytes) -> dict:
-        try:
-            image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
-        except Exception as e:
-            print(f"[CropValidation] Error reading image bytes: {e}")
-            print("[CropValidation]\nPrediction: rejected\nClass: non_leaf\nConfidence: 0.99")
+    def warm_up(self):
+        """Warm up TensorFlow model execution graph during startup."""
+        if self.model is not None:
+            try:
+                dummy = np.zeros((1, 224, 224, 3), dtype=np.float32)
+                _ = self.model(dummy, training=False) if callable(self.model) else self.model.predict(dummy)
+            except Exception as e:
+                print(f"[CropValidation] Warm-up warning: {e}")
+
+    def validate_crop_image(self, image_input, arr_input: np.ndarray = None) -> dict:
+        if isinstance(image_input, bytes):
+            try:
+                image = Image.open(io.BytesIO(image_input)).convert('RGB')
+            except Exception as e:
+                print(f"[CropValidation] Error reading image bytes: {e}")
+                print("[CropValidation]\nPrediction: rejected\nClass: non_leaf\nConfidence: 0.99")
+                return {
+                    "status": "rejected",
+                    "reason": "Invalid image format. Please upload a valid lettuce leaf photo.",
+                    "class": "non_leaf",
+                    "confidence": 0.99
+                }
+        elif isinstance(image_input, Image.Image):
+            image = image_input
+        else:
             return {
                 "status": "rejected",
-                "reason": "Invalid image format. Please upload a valid lettuce leaf photo.",
+                "reason": "Invalid image payload.",
                 "class": "non_leaf",
                 "confidence": 0.99
             }
-
-        print(f"[CropValidation] Received image size: {image.size}, mode: {image.mode}")
 
         img_arr = np.array(image.resize((100, 100)), dtype=float)
         r, g, b = img_arr[:, :, 0], img_arr[:, :, 1], img_arr[:, :, 2]
@@ -92,10 +115,12 @@ class CropValidationService:
 
         if self.model is not None:
             try:
-                img_resized = image.resize((224, 224))
-                arr = np.array(img_resized, dtype=np.float32) / 255.0
-                arr = np.expand_dims(arr, axis=0)
-                print(f"[CropValidation] Preprocessed array shape: {arr.shape}")
+                if arr_input is not None:
+                    arr = arr_input
+                else:
+                    img_resized = image.resize((224, 224))
+                    arr = np.array(img_resized, dtype=np.float32) / 255.0
+                    arr = np.expand_dims(arr, axis=0)
 
                 preds = self.model(arr, training=False) if callable(self.model) else self.model.predict(arr)
                 raw_out = to_numpy(preds[0])
@@ -110,16 +135,18 @@ class CropValidationService:
 
                 pred_idx = int(np.argmax(probs))
                 raw_confidence = float(probs[pred_idx])
+                predicted_class = CLASS_NAMES[pred_idx]
+                confidence = raw_confidence
 
-                # Foliage & crop identity guard rules for hydroponic lettuce
+                # Foliage & crop identity guard rules:
+                # Reject non-leaves or non-lettuce based on color features, but do NOT override model class when green_ratio >= 0.06
                 if is_grayscale or plant_ratio < 0.005:
                     predicted_class = 'non_leaf'
                     confidence = max(raw_confidence, 0.96)
                 elif green_ratio < 0.06:
                     predicted_class = 'other_plant_leaf'
                     confidence = max(raw_confidence, 0.94)
-                else:
-                    predicted_class = 'lettuce_leaf'
+                elif predicted_class == 'lettuce_leaf':
                     confidence = max(raw_confidence, 0.95)
 
                 mapping = {CLASS_NAMES[i]: round(float(probs[i]), 4) for i in range(min(len(CLASS_NAMES), len(probs)))}
@@ -132,6 +159,9 @@ class CropValidationService:
                 predicted_class, confidence = self._cv_fallback(is_grayscale, plant_ratio, green_ratio)
         else:
             predicted_class, confidence = self._cv_fallback(is_grayscale, plant_ratio, green_ratio)
+
+        # Temporary Debug Logging as required by Bug 6
+        print(f"[Crop Validation Debug] predicted_class={predicted_class}, confidence={confidence:.4f}, green_ratio={green_ratio:.4f}, foliage_ratio={plant_ratio:.4f}")
 
         confidence = round(confidence, 2)
 

@@ -2,7 +2,7 @@ import client from './client';
 
 export const predictGrowth = async (params) => {
   try {
-    const response = await client.post('/api/predict', params);
+    const response = await client.post('/api/predict', params, { timeout: 30000 });
     return response.data;
   } catch (error) {
     console.warn('Backend API unreachable — using HydroGrow AI fallback ML inference engine:', error.message);
