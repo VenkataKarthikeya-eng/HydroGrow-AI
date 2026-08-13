@@ -50,6 +50,21 @@ services:
       - "80:80"
     depends_on:
       - backend
+      - ai_backend
+    networks:
+      - hydrogrow_network
+
+  ai_backend:
+    build:
+      context: ./ai_backend
+      dockerfile: Dockerfile
+    container_name: hydrogrow_ai_backend
+    restart: always
+    environment:
+      PORT: 8001
+      CORS_ORIGINS: "https://hydro-grow-ai.vercel.app,http://localhost:5173"
+    ports:
+      - "8001:8001"
     networks:
       - hydrogrow_network
 
