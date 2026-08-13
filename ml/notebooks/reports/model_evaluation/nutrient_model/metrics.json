@@ -1,0 +1,12 @@
+{
+    "model_name": "MobileNetV3Small Nutrient Classifier",
+    "task_type": "Classification",
+    "accuracy": 0.3438,
+    "precision_macro": 0.0887,
+    "recall_macro": 0.25,
+    "f1_score_macro": 0.131,
+    "precision_weighted": 0.122,
+    "recall_weighted": 0.3438,
+    "f1_score_weighted": 0.1801,
+    "execution_date": "2026-07-28 00:54:58"
+}

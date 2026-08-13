@@ -1,0 +1,28 @@
+{
+    "best_model": "Linear Regression",
+    "best_r2": 0.5470448138178875,
+    "models_evaluated": [
+        {
+            "Model": "Linear Regression",
+            "MAE": 34.904,
+            "RMSE": 41.8659,
+            "R2 Score": 0.547,
+            "MAPE": 13.29
+        },
+        {
+            "Model": "Random Forest",
+            "MAE": 34.9723,
+            "RMSE": 42.0951,
+            "R2 Score": 0.5421,
+            "MAPE": 13.32
+        },
+        {
+            "Model": "Gradient Boosting",
+            "MAE": 34.9041,
+            "RMSE": 41.866,
+            "R2 Score": 0.547,
+            "MAPE": 13.29
+        }
+    ],
+    "execution_date": "2026-07-28 00:34:29"
+}

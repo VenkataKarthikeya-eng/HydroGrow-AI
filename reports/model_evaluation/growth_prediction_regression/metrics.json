@@ -1,0 +1,28 @@
+{
+    "best_model": "Random Forest",
+    "best_r2": 0.5873391581812445,
+    "models_evaluated": [
+        {
+            "Model": "Linear Regression",
+            "MAE": 16.4507,
+            "RMSE": 20.8547,
+            "R2 Score": 0.4186,
+            "MAPE": 13.59
+        },
+        {
+            "Model": "Random Forest",
+            "MAE": 13.1822,
+            "RMSE": 17.5695,
+            "R2 Score": 0.5873,
+            "MAPE": 13.28
+        },
+        {
+            "Model": "Gradient Boosting",
+            "MAE": 14.7593,
+            "RMSE": 19.4902,
+            "R2 Score": 0.4922,
+            "MAPE": 14.73
+        }
+    ],
+    "execution_date": "2026-07-28 00:17:28"
+}

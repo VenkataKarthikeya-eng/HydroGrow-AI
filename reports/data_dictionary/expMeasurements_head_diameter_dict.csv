@@ -1,0 +1,6 @@
+Column Name,Data Type,Missing Count,Missing Percentage,Unique Values,Sample Values,Description
+experiment,str,0,0.0,1,['EXP.1. Environmental Conditions and Plant Measurements'],"Experiment identifier (Experiment 1, 2, or 3)"
+replicate,str,0,0.0,5,"['Replicate 2', 'Replicate 3', 'Replicate 4', 'Replicate 5', 'Replicate 6']",Replicate/treatment system identifier
+day,str,0,0.0,1,['Replicate 1'],Day of measurement relative to transplant
+plant_no,int64,0,0.0,10,"[1, 2, 3, 4, 5]",Plant identification number within replicate
+head_diameter,str,0,0.0,15,"['4*3.5', '4*3', '4*4', '5*3', '3*3.5']",Head diameter (often W*H format)

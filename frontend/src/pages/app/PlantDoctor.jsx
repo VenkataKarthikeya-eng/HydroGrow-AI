@@ -17,11 +17,11 @@ export default function PlantDoctor() {
   const [error, setError] = useState(null);
 
   const loaderSteps = [
-    'Uploading image...',
-    'AI analyzing with computer vision models...',
-    'Running Crop Identity Validation Gatekeeper...',
+    'Waking AI server (initializing cloud container)...',
+    'Loading computer vision model (MobileNetV3 & EfficientNet)...',
+    'Analyzing plant image & Crop Validation Gatekeeper...',
     'Evaluating Growth Stage & Nutrient Deficiency...',
-    'Compiling tailored agronomist advice...'
+    'Generating diagnosis & tailored agronomist advice...'
   ];
 
   const analyzeImageFile = async (file) => {
@@ -41,8 +41,13 @@ export default function PlantDoctor() {
       });
     }, 450);
 
+    // Friendly Render free-tier cold-start indicator timer
+    const coldStartTimer = setTimeout(() => {
+      setLoadingStatus('⚡ Waking AI server (Cold-Start Mode: Loading PyTorch & Computer Vision Models)...');
+    }, 6000);
+
     try {
-      const data = await plantDoctorApi.analyzePlantCombined(file);
+      const data = await plantDoctorApi.analyzePlantCombined(file, (msg) => setLoadingStatus(msg));
 
       if (data?.status === 'rejected') {
         setRejectionInfo(data);
@@ -55,8 +60,8 @@ export default function PlantDoctor() {
       console.error('Plant Doctor API error:', err);
       if (err?.status === 'rejected') {
         setRejectionInfo(err);
-      } else if (err?.code === 'ECONNABORTED' || err?.reason?.includes('timeout')) {
-        setError('API Request Timeout: The AI server took too long to respond (30s limit). Please try again.');
+      } else if (err?.code === 'ECONNABORTED' || err?.reason?.includes('timeout') || err?.reason?.includes('Cold-Start')) {
+        setError('⏳ Render AI Server Cold-Start Timeout: Free cloud instances sleep after inactivity and require ~45 seconds to spin up model containers. Please click "Try Again".');
       } else {
         const msg = (typeof err?.reason === 'string' && err.reason) ||
                     (typeof err?.detail === 'string' && err.detail) ||
@@ -66,6 +71,7 @@ export default function PlantDoctor() {
       }
     } finally {
       clearInterval(stepInterval);
+      clearTimeout(coldStartTimer);
       setLoading(false);
     }
   };

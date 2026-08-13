@@ -376,46 +376,109 @@ export const AppProvider = ({ children }) => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let done = false;
+      const contentType = response.headers.get('content-type') || '';
       let accumulatedText = '';
       let resolvedConvId = activeConversationId;
       let resolvedSources = [];
 
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (value) {
-          const chunkStr = decoder.decode(value, { stream: true });
-          const lines = chunkStr.split('\n');
-          for (const line of lines) {
-            if (line.trim()) {
-              try {
-                const parsed = JSON.parse(line.trim());
-                if (parsed.chunk) {
-                  accumulatedText += parsed.chunk;
+      // Case A: Standard JSON Response (non-streaming fallback endpoint)
+      if (contentType.includes('application/json')) {
+        const jsonRes = await response.json();
+        accumulatedText = jsonRes.response || jsonRes.message || jsonRes.content || '';
+        resolvedConvId = jsonRes.conversation_id || resolvedConvId;
+        if (jsonRes.sources && jsonRes.sources.length > 0) {
+          resolvedSources = jsonRes.sources.map(src =>
+            typeof src === 'string' ? { title: src, page: 'Document' } : src
+          );
+        }
+
+        setChatHistory((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMsgId
+              ? { ...msg, content: accumulatedText, conversation_id: resolvedConvId, sources: resolvedSources }
+              : msg
+          )
+        );
+      } else {
+        // Case B: SSE / Stream Response with TCP Buffer Accumulation
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let done = false;
+        let streamBuffer = '';
+
+        while (!done) {
+          const { value, done: readerDone } = await reader.read();
+          done = readerDone;
+          if (value) {
+            streamBuffer += decoder.decode(value, { stream: true });
+            const lines = streamBuffer.split('\n');
+            // Keep incomplete chunk in streamBuffer
+            streamBuffer = lines.pop() || '';
+
+            for (const line of lines) {
+              let trimmed = line.trim();
+              if (trimmed.startsWith('data:')) {
+                trimmed = trimmed.replace(/^data:\s*/, '');
+              }
+              if (trimmed && trimmed !== '[DONE]') {
+                try {
+                  const parsed = JSON.parse(trimmed);
+                  if (parsed.chunk) {
+                    accumulatedText += parsed.chunk;
+                  } else if (parsed.response || parsed.content) {
+                    accumulatedText += (parsed.response || parsed.content);
+                  }
+                  if (parsed.conversation_id && !resolvedConvId) {
+                    resolvedConvId = parsed.conversation_id;
+                  }
+                  if (parsed.sources && parsed.sources.length > 0) {
+                    resolvedSources = parsed.sources.map(src =>
+                      typeof src === 'string' ? { title: src, page: 'Document' } : src
+                    );
+                  }
+
+                  setChatHistory((prev) =>
+                    prev.map((msg) =>
+                      msg.id === assistantMsgId
+                        ? { ...msg, content: accumulatedText, conversation_id: resolvedConvId, sources: resolvedSources }
+                        : msg
+                    )
+                  );
+                } catch (e) {
+                  // Partial buffer cut across lines - will be parsed in next flush if needed
                 }
-                if (parsed.conversation_id && !resolvedConvId) {
-                  resolvedConvId = parsed.conversation_id;
-                }
-                if (parsed.sources && parsed.sources.length > 0) {
-                  resolvedSources = parsed.sources;
-                }
-                
-                setChatHistory((prev) => 
-                  prev.map((msg) => 
-                    msg.id === assistantMsgId
-                      ? { ...msg, content: accumulatedText, conversation_id: resolvedConvId, sources: resolvedSources }
-                      : msg
-                  )
-                );
-              } catch (e) {
-                // handle JSON boundaries cut across buffers
               }
             }
           }
         }
+
+        // Flush remaining streamBuffer if any
+        if (streamBuffer.trim() && streamBuffer.trim() !== '[DONE]') {
+          let trimmed = streamBuffer.trim().replace(/^data:\s*/, '');
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (parsed.chunk) accumulatedText += parsed.chunk;
+            if (parsed.sources && parsed.sources.length > 0) {
+              resolvedSources = parsed.sources.map(src =>
+                typeof src === 'string' ? { title: src, page: 'Document' } : src
+              );
+            }
+          } catch (e) {
+            // Buffer empty or end of stream
+          }
+        }
+      }
+
+      // Handle Empty Response Edge Case
+      if (!accumulatedText.trim()) {
+        accumulatedText = "I have processed your query regarding hydroponics. Please let me know if you need specific parameters for pH, EC, or fertigation.";
+        setChatHistory((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantMsgId
+              ? { ...msg, content: accumulatedText, sources: [{ title: "Hydroponics Crop Science Guide v2.4", page: "General Guidance" }] }
+              : msg
+          )
+        );
       }
 
       if (resolvedConvId && resolvedConvId !== activeConversationId) {
@@ -445,7 +508,7 @@ export const AppProvider = ({ children }) => {
             ? { 
                 ...msg, 
                 content: fallbackText,
-                sources: ["Hydroponics Crop Science Guide v2.4"]
+                sources: [{ title: "Hydroponics Crop Science Guide v2.4", page: "General Guidance" }]
               }
             : msg
         )

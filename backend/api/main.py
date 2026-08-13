@@ -29,7 +29,14 @@ app = FastAPI(
 # Enable CORS using production settings and wildcard/Vercel origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:3000",
+        "https://hydro-grow-ai.vercel.app",
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -63,7 +70,7 @@ async def validation_exception_handler(request, exc):
 @app.get("/health", summary="Production System Health Check")
 def get_health_check():
     return {
-        "status": "healthy",
+        "status": "ok",
         "service": "HydroGrow AI Backend"
     }
 

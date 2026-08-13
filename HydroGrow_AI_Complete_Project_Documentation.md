@@ -1177,20 +1177,21 @@ VITE_API_BASE_URL=https://hydrogrow-ai-plant-doctor.onrender.com
 | **Service Type** | Web Service (Docker) |
 | **Python Version** | 3.11-slim |
 | **Port** | 8000 |
-| **Start Command** | `uvicorn main:app --host 0.0.0.0 --port 8000` |
+| **Start Command** | `uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}` |
 | **Root Directory** | `ai_backend/` |
 
 **Dockerfile (`ai_backend/Dockerfile`):**
 ```dockerfile
 FROM python:3.11-slim
 WORKDIR /app
-RUN apt-get update && apt-get install -y build-essential libgl1 libglib2.0-0 ...
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libgl1 libglib2.0-0 libsm6 libxext6 libxrender1
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ml_models ./ml_models     # Copy trained .keras models
 COPY . .
 EXPOSE 8000
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
 ```
 
 **Key Dependencies:**
@@ -1242,18 +1243,20 @@ Production-ready Kubernetes manifests in `deployment/`:
 
 | # | Problem | Root Cause | Solution |
 |---|---------|-----------|----------|
-| 1 | **Keras model compatibility** | TensorFlow version mismatch between training and deployment environments | Used `compile=False` when loading models; implemented fallback to standalone Keras backend |
-| 2 | **TensorFlow loading on Render** | Large TF package exceeding Render memory limits during build | Used `python:3.11-slim` with system libraries; installed only `tensorflow` (not `tensorflow-gpu`) |
-| 3 | **Model path resolution in Docker** | Models at `/app/ml_models/` in Docker but `./ml_models/` locally | Dynamic path resolution: check Docker path first, fall back to relative path |
-| 4 | **Crop validation false rejections** | Model alone was misclassifying valid lettuce images | Added color-based heuristic guard rules (green ratio, plant foliage mask) as override layer |
-| 5 | **Yield calculation precision** | Initial simulation formula produced unrealistic results | Calibrated with `baseWeight=310g`, `maxOptimalWeight=380g`, and `progress^2.2` exponential growth curve |
-| 6 | **API connection timeout** | Cold start on Render free tier takes 30-50 seconds | Set frontend timeout to 30s; added step-by-step loading UX to keep users engaged |
-| 7 | **Nutrient model class imbalance** | Only 12 healthy images vs ~65 per deficiency class | Applied class weighting in training + heavy data augmentation (rotation, flip, brightness) |
-| 8 | **CORS configuration** | Frontend on Vercel domain blocked by backend CORS policy | Added wildcard origins + Vercel regex pattern: `allow_origin_regex=r"https://.*\.vercel\.app"` |
-| 9 | **Softmax normalization** | Some models returned raw logits instead of probabilities | Added runtime softmax check: if values are negative or don't sum to 1, apply manual softmax |
-| 10 | **OpenCV on Alpine Linux** | `cv2` import failing in Docker due to missing system libraries | Added `libgl1`, `libglib2.0-0`, `libsm6`, `libxext6`, `libxrender1` to Dockerfile |
-| 11 | **React Router SPA routing** | Nginx returning 404 on direct URL access (e.g., `/plant-doctor`) | Added `try_files $uri $uri/ /index.html` to Nginx config for SPA fallback |
-| 12 | **Model size in Git** | `.keras` files too large for Git tracking | Added `*.keras` to `.gitignore`; models managed separately (not in Git history) |
+| 1 | **Render Port Binding Error (Plant Doctor Network Error)** | Render assigns dynamic `$PORT` env variable at runtime; hardcoding 8000 caused port binding failures | Updated Dockerfile `CMD` to `["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]` and fixed frontend `BASE_URL` fallback resolution |
+| 2 | **Render ModuleNotFoundError** | `ai_backend` attempted to import non-existent `assistant` modules from main `backend` directory | Decoupled `ai_backend` routes to be completely standalone without dependencies on main `backend` |
+| 3 | **Keras model compatibility** | TensorFlow version mismatch between training and deployment environments | Used `compile=False` when loading models; implemented fallback to standalone Keras backend |
+| 4 | **TensorFlow loading on Render** | Large TF package exceeding Render memory limits during build | Used `python:3.11-slim` with system libraries; installed only `tensorflow` (not `tensorflow-gpu`) |
+| 5 | **Model path resolution in Docker** | Models at `/app/ml_models/` in Docker but `./ml_models/` locally | Dynamic path resolution: check Docker path first, fall back to relative path |
+| 6 | **Crop validation false rejections** | Model alone was misclassifying valid lettuce images | Added color-based heuristic guard rules (green ratio, plant foliage mask) as override layer |
+| 7 | **Yield calculation precision** | Initial simulation formula produced unrealistic results | Calibrated with `baseWeight=310g`, `maxOptimalWeight=380g`, and `progress^2.2` exponential growth curve |
+| 8 | **API connection timeout** | Cold start on Render free tier takes 30-50 seconds | Set frontend timeout to 30s; added step-by-step loading UX to keep users engaged |
+| 9 | **Nutrient model class imbalance** | Only 12 healthy images vs ~65 per deficiency class | Applied class weighting in training + heavy data augmentation (rotation, flip, brightness) |
+| 10 | **CORS configuration** | Frontend on Vercel domain blocked by backend CORS policy | Added wildcard origins + Vercel regex pattern: `allow_origin_regex=r"https://.*\.vercel\.app"` |
+| 11 | **Softmax normalization** | Some models returned raw logits instead of probabilities | Added runtime softmax check: if values are negative or don't sum to 1, apply manual softmax |
+| 12 | **OpenCV on Alpine Linux** | `cv2` import failing in Docker due to missing system libraries | Added `libgl1`, `libglib2.0-0`, `libsm6`, `libxext6`, `libxrender1` to Dockerfile |
+| 13 | **React Router SPA routing** | Nginx returning 404 on direct URL access (e.g., `/plant-doctor`) | Added `try_files $uri $uri/ /index.html` to Nginx config for SPA fallback |
+| 14 | **Model size in Git** | `.keras` files too large for Git tracking | Added `*.keras` to `.gitignore`; models managed separately (not in Git history) |
 
 ---
 

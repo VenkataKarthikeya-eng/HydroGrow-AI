@@ -36,7 +36,9 @@ def get_assistant_response(user_query: str) -> tuple[str, List[str]]:
             "- **Mature / Pre-Harvest:** `2.0 – 2.4 mS/cm`\n\n"
             "**Key Advice:** Ensure continuous solution recirculation and keep water temperature under 22°C to prevent tip-burn."
         )
-        sources = ["Hydroponics Crop Science Guide v2.4", "Section 4: Bioavailability & EC Range"]
+        sources = [
+            {"title": "Hydroponics Crop Science Guide v2.4", "page": "Section 4: Bioavailability & EC Range"}
+        ]
     elif "ph" in query or "acid" in query:
         response = (
             "### 🧪 Water pH Optimization\n\n"
@@ -45,7 +47,9 @@ def get_assistant_response(user_query: str) -> tuple[str, List[str]]:
             "- If pH drops below **5.2**, root tissue injury can occur.\n\n"
             "**Action:** Calibrate pH probes daily and dose pH-down (phosphoric acid) as needed."
         )
-        sources = ["Hydroponics Crop Science Guide v2.4", "Section 3: pH Control Protocols"]
+        sources = [
+            {"title": "Hydroponics Crop Science Guide v2.4", "page": "Section 3: pH Control Protocols"}
+        ]
     elif "root" in query or "rot" in query or "pythium" in query:
         response = (
             "### 🌱 Pathology Management: Root Rot (Pythium)\n\n"
@@ -54,7 +58,9 @@ def get_assistant_response(user_query: str) -> tuple[str, List[str]]:
             "- **Aeration:** Ensure dissolved oxygen (DO) levels stay above **6.5 mg/L**.\n"
             "- **Treatment:** Flush reservoir and apply beneficial microbes (*Bacillus amyloliquefaciens*)."
         )
-        sources = ["Pathology Index for Closed Loop Systems", "Page 42: Pythium Management"]
+        sources = [
+            {"title": "Pathology Index for Closed Loop Systems", "page": "Page 42: Pythium Management"}
+        ]
     elif "growth" in query or "stage" in query or "yield" in query or "predict" in query:
         response = (
             "### 📈 Lettuce Growth Stage Pipeline\n\n"
@@ -64,13 +70,17 @@ def get_assistant_response(user_query: str) -> tuple[str, List[str]]:
             "3. **Vegetative Phase (Days 11–20):** Rapid leaf expansion, EC 1.8–2.2 mS/cm\n"
             "4. **Harvest Stage (Days 21–28):** Final head formation, weight 180–350g\n"
         )
-        sources = ["Crop Lifecycle Manual v1.2", "Page 15: Growth Stages"]
+        sources = [
+            {"title": "Crop Lifecycle Manual v1.2", "page": "Page 15: Growth Stages"}
+        ]
     else:
         response = (
             "Based on our hydroponics crop science index, maintaining an EC level between 1.8 and 2.4 mS/cm "
             "and water pH between 5.8 and 6.4 ensures optimal nutrient bioavailability for leafy greens like lettuce and basil."
         )
-        sources = ["Hydroponics Crop Science Guide v2.4"]
+        sources = [
+            {"title": "Hydroponics Crop Science Guide v2.4", "page": "General Guidance"}
+        ]
 
     return response, sources
 

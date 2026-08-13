@@ -11,9 +11,9 @@
 
 ## 2. Feature Standardizations and Mappings
 Replicate systems from sheet-level datasets (`replicate_X_tY`) were mapped to harvest systems as follows:
-- **Experiment 1**: Replicate X, Tank Y maps to `R{Y}-T{X}`
-- **Experiment 2**: Replicate X, Tank Y maps to `R{X}-T{Y}`
-- **Experiment 3**: Replicate X, Tank Y maps to `R{X}T{Y}`
+- **Experiment 1**: Replicate X, Tank Y maps to `R{Y}-T{X}` 
+- **Experiment 2**: Replicate X, Tank Y maps to `R{X}-T{Y}` 
+- **Experiment 3**: Replicate X, Tank Y maps to `R{X}T{Y}` 
 
 ## 3. List of Engineered Features
 ### 3.1 Metadata & Key Identifiers

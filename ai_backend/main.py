@@ -29,11 +29,11 @@ app.include_router(assistant_router)
 
 # Allowed origins for production & development
 origins = [
-    "*",
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://hydrogrow-ai.vercel.app",
-    "https://hydrogrow.vercel.app",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:3000",
+    "https://hydro-grow-ai.vercel.app",
 ]
 
 app.add_middleware(
@@ -63,7 +63,7 @@ def startup_event():
 @app.get("/health", summary="Health check endpoint")
 def health_check():
     return {
-        "status": "healthy",
+        "status": "ok",
         "service": "HydroGrow AI Plant Doctor Backend"
     }
 

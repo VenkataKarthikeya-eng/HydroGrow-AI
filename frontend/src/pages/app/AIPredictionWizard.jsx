@@ -58,7 +58,23 @@ export default function AIPredictionWizard() {
     }, 700);
 
     try {
-      await runPrediction(formData);
+      const fullPayload = {
+        air_temperature: formData.air_temperature || 22.0,
+        humidity: formData.humidity || 60.0,
+        co2: formData.co2 || 450.0,
+        water_ph: formData.water_ph || 6.2,
+        water_ec: formData.water_ec || 2.0,
+        water_temperature: formData.water_temperature || 23.0,
+        nutrient_solution: formData.nutrient_solution || 400.0,
+        water_consumption: formData.water_consumption || 170.0,
+        seedling_height: formData.seedling_height || 12.0,
+        seedling_weight: formData.seedling_weight || 4.0,
+        root_length: formData.root_length || 7.0,
+      };
+
+      console.log('Sending Yield Prediction API Payload:', fullPayload);
+
+      await runPrediction(fullPayload);
       setStep(3);
     } catch (err) {
       console.error('Yield Prediction API Error:', err);
@@ -75,12 +91,11 @@ export default function AIPredictionWizard() {
     setStep(1);
   };
 
-  const yieldResult = predictionResult?.predicted_yield_grams 
-    ? `${predictionResult.predicted_yield_grams.toFixed(1)}g` 
-    : '382.7g';
+  const rawWeight = predictionResult?.predicted_yield_grams ?? predictionResult?.prediction?.predicted_weight;
+  const yieldResult = rawWeight != null ? `${Number(rawWeight).toFixed(1)}g` : '382.7g';
 
   const confidence = predictionResult?.confidence_score 
-    ? `${(predictionResult.confidence_score * 100).toFixed(0)}%` 
+    ? `${(predictionResult.confidence_score * (predictionResult.confidence_score <= 1 ? 100 : 1)).toFixed(0)}%` 
     : '91%';
 
   return (
@@ -300,8 +315,14 @@ export default function AIPredictionWizard() {
           <div className="saas-card p-8 sm:p-10 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 text-emerald-200 text-xs font-bold uppercase tracking-wider">
-                <CheckCircle2 className="w-4 h-4 text-emerald-300" /> ML Harvest Yield Forecast Result
+                <CheckCircle2 className="w-4 h-4 text-emerald-300" /> 
+                {predictionResult?.isOfflineFallback ? 'Offline Estimated Prediction' : 'ML Harvest Yield Forecast Result'}
               </div>
+              {predictionResult?.isOfflineFallback && (
+                <span className="inline-block mt-1.5 px-3 py-1 bg-amber-500/20 text-amber-200 border border-amber-400/40 rounded-lg text-xs font-bold">
+                  ⚠️ Offline Heuristic Estimate (Backend Unreachable)
+                </span>
+              )}
               <div className="text-5xl sm:text-6xl font-black mt-2 tracking-tight">
                 {yieldResult} <span className="text-2xl font-medium text-emerald-200">/ plant</span>
               </div>

@@ -27,7 +27,8 @@ data/crop_validator_dataset/
 venv/
 ai_backend/venv/
 .venv/
+hydrogrow-env/
 
 # Logs & Cache
 *.log
-.pytest_cache/
+.pytest_cache/

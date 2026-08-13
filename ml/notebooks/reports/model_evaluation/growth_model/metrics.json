@@ -1,0 +1,12 @@
+{
+    "model_name": "EfficientNetB0 Growth Stage Classifier",
+    "task_type": "Classification",
+    "accuracy": 0.98,
+    "precision_macro": 0.9804,
+    "recall_macro": 0.9804,
+    "f1_score_macro": 0.9798,
+    "precision_weighted": 0.9812,
+    "recall_weighted": 0.98,
+    "f1_score_weighted": 0.98,
+    "execution_date": "2026-07-28 00:47:09"
+}

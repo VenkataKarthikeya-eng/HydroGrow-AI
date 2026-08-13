@@ -1,0 +1,12 @@
+{
+    "model_name": "Test Model",
+    "task_type": "Classification",
+    "accuracy": 1.0,
+    "precision_macro": 1.0,
+    "recall_macro": 1.0,
+    "f1_score_macro": 1.0,
+    "precision_weighted": 1.0,
+    "recall_weighted": 1.0,
+    "f1_score_weighted": 1.0,
+    "execution_date": "2026-07-28 00:16:34"
+}

@@ -184,11 +184,15 @@ export default function AIAssistantPage() {
                   {msg.sources && msg.sources.length > 0 && (
                     <div className="flex flex-wrap items-center gap-2 text-xs pt-1">
                       <span className="text-slate-400 font-bold text-[11px] uppercase tracking-wider">Sources:</span>
-                      {msg.sources.map((src, i) => (
-                        <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold border border-emerald-200/50 dark:border-emerald-900/50">
-                          <BookOpen className="w-3 h-3 text-emerald-600" /> {src.title} ({src.page})
-                        </span>
-                      ))}
+                      {msg.sources.map((src, i) => {
+                        const title = typeof src === 'string' ? src : (src.title || 'Reference Guide');
+                        const page = typeof src === 'object' && src.page ? ` (${src.page})` : '';
+                        return (
+                          <span key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 text-[11px] font-semibold border border-emerald-200/50 dark:border-emerald-900/50">
+                            <BookOpen className="w-3 h-3 text-emerald-600" /> {title}{page}
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
 
