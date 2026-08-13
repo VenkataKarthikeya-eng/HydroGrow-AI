@@ -58,18 +58,24 @@ export default function AIPredictionWizard() {
     }, 700);
 
     try {
+      const clamp = (val, min, max, defaultVal) => {
+        const num = parseFloat(val);
+        if (isNaN(num)) return defaultVal;
+        return Math.min(Math.max(num, min), max);
+      };
+
       const fullPayload = {
-        air_temperature: formData.air_temperature || 22.0,
-        humidity: formData.humidity || 60.0,
-        co2: formData.co2 || 450.0,
-        water_ph: formData.water_ph || 6.2,
-        water_ec: formData.water_ec || 2.0,
-        water_temperature: formData.water_temperature || 23.0,
-        nutrient_solution: formData.nutrient_solution || 400.0,
-        water_consumption: formData.water_consumption || 170.0,
-        seedling_height: formData.seedling_height || 12.0,
-        seedling_weight: formData.seedling_weight || 4.0,
-        root_length: formData.root_length || 7.0,
+        air_temperature: clamp(formData.air_temperature, 10.0, 40.0, 22.0),
+        humidity: clamp(formData.humidity, 30.0, 90.0, 60.0),
+        co2: clamp(formData.co2, 300.0, 1000.0, 450.0),
+        water_ph: clamp(formData.water_ph, 4.0, 9.0, 6.2),
+        water_ec: clamp(formData.water_ec, 0.5, 5.0, 2.0),
+        water_temperature: clamp(formData.water_temperature, 15.0, 35.0, 23.0),
+        nutrient_solution: clamp(formData.nutrient_solution, 0.0, 1500.0, 400.0),
+        water_consumption: clamp(formData.water_consumption, 0.0, 500.0, 170.0),
+        seedling_height: clamp(formData.seedling_height, 5.0, 20.0, 12.0),
+        seedling_weight: clamp(formData.seedling_weight, 0.5, 10.0, 4.0),
+        root_length: clamp(formData.root_length, 3.0, 15.0, 7.0),
       };
 
       console.log('Sending Yield Prediction API Payload:', fullPayload);

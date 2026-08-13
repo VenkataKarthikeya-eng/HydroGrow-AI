@@ -136,6 +136,11 @@ async def analyze_plant_combined(
     if not file.filename:
         raise HTTPException(status_code=400, detail="Uploaded file must have a valid filename.")
 
+    ext = os.path.splitext(file.filename)[1].lower()
+    valid_exts = ['.jpg', '.jpeg', '.png', '.webp']
+    if ext and ext not in valid_exts:
+        raise HTTPException(status_code=400, detail=f"Invalid file extension '{ext}'. Please upload a JPG, JPEG, or PNG lettuce leaf image.")
+
     t_pipeline_start = time.perf_counter()
 
     # Stage 1: Image Upload & Decode
@@ -143,6 +148,13 @@ async def analyze_plant_combined(
     print("[Plant Doctor Pipeline Diagnostic Log]")
     t_stage1_start = time.perf_counter()
     contents = await file.read()
+
+    if not contents or len(contents) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded file is empty. Please select a valid image file.")
+
+    if len(contents) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="File is too large. Maximum allowed image size is 10 MB.")
+
     try:
         image = Image.open(io.BytesIO(contents)).convert('RGB')
         img_resized = image.resize((224, 224))
@@ -150,7 +162,7 @@ async def analyze_plant_combined(
         batch_arr = np.expand_dims(arr_224, axis=0)
     except Exception as e:
         print(f"[Stage 1 Error] Image decode failed: {e}")
-        raise HTTPException(status_code=400, detail=f"Invalid image format: {str(e)}")
+        raise HTTPException(status_code=400, detail=f"Corrupted or invalid image file: {str(e)}")
     t_stage1 = time.perf_counter() - t_stage1_start
     print(f"✓ Stage 1: Image Upload & Decode Time: {t_stage1:.4f}s")
 

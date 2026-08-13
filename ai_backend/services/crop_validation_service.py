@@ -178,7 +178,7 @@ class CropValidationService:
                 status = "rejected"
                 result = {
                     "status": "rejected",
-                    "reason": "Unable to confidently identify lettuce leaf. Please upload a clearer lettuce image.",
+                    "reason": "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image.",
                     "class": "lettuce_leaf",
                     "confidence": confidence
                 }
@@ -186,7 +186,7 @@ class CropValidationService:
             status = "rejected"
             result = {
                 "status": "rejected",
-                "reason": "This image appears to be another plant. Please upload a lettuce leaf image.",
+                "reason": "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image.",
                 "class": "other_plant_leaf",
                 "confidence": confidence
             }
@@ -194,7 +194,7 @@ class CropValidationService:
             status = "rejected"
             result = {
                 "status": "rejected",
-                "reason": "Invalid image. Please upload a lettuce leaf image.",
+                "reason": "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image.",
                 "class": "non_leaf",
                 "confidence": confidence
             }
