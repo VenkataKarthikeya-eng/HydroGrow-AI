@@ -19,6 +19,74 @@ const DEFAULT_INPUTS = {
   root_length: 7.0
 };
 
+const DEFAULT_SAVED_PREDICTIONS = [
+  {
+    id: 'batch-214',
+    label: 'Batch #214 - Vegetative Flush',
+    timestamp: 'Jul 18, 2026',
+    created_at: '2026-07-18T10:30:00.000Z',
+    crop: 'Butterhead Lettuce',
+    predicted_weight: 382.7,
+    confidence_score: 0.91,
+    growth_category: '🌟 Excellent',
+    status: 'Optimized',
+    inputs: { air_temperature: 22.0, water_ph: 6.2, water_ec: 2.0, humidity: 60.0, co2: 450.0, water_temperature: 23.0, nutrient_solution: 400.0, water_consumption: 170.0, seedling_height: 12.0, seedling_weight: 4.0, root_length: 7.0 }
+  },
+  {
+    id: 'batch-213',
+    label: 'Batch #213 - Canopy Expansion Run',
+    timestamp: 'Jul 11, 2026',
+    created_at: '2026-07-11T14:15:00.000Z',
+    crop: 'Butterhead Lettuce',
+    predicted_weight: 365.4,
+    confidence_score: 0.93,
+    growth_category: '🌟 Excellent',
+    status: 'Optimized',
+    inputs: { air_temperature: 22.5, water_ph: 6.0, water_ec: 2.1, humidity: 65.0, co2: 450.0, water_temperature: 22.5, nutrient_solution: 420.0, water_consumption: 180.0, seedling_height: 11.5, seedling_weight: 3.8, root_length: 6.5 }
+  },
+  {
+    id: 'batch-212',
+    label: 'Batch #212 - EC Tuning Trial',
+    timestamp: 'Jul 04, 2026',
+    created_at: '2026-07-04T09:00:00.000Z',
+    crop: 'Butterhead Lettuce',
+    predicted_weight: 340.0,
+    confidence_score: 0.89,
+    growth_category: '✅ Good',
+    status: 'Optimized',
+    inputs: { air_temperature: 21.5, water_ph: 6.1, water_ec: 2.2, humidity: 55.0, co2: 400.0, water_temperature: 22.0, nutrient_solution: 380.0, water_consumption: 160.0, seedling_height: 10.0, seedling_weight: 3.5, root_length: 6.0 }
+  }
+];
+
+const DEFAULT_PLANT_DOCTOR_SCANS = [
+  {
+    id: 'scan-101',
+    label: 'Leaf Scan #101 - Routine Canopy Inspection',
+    timestamp: 'Aug 29, 2026',
+    created_at: '2026-08-29T11:20:00.000Z',
+    crop: 'Butterhead Lettuce',
+    condition: 'Healthy',
+    stage: 'Vegetative',
+    growth_day: 16,
+    confidence: 0.95,
+    status: 'Optimized',
+    recommendation: 'Plant growth is in Vegetative stage (Day 16). Nutrient balance is optimal. Continue standard fertigation.'
+  },
+  {
+    id: 'scan-100',
+    label: 'Leaf Scan #100 - Seedling Health Check',
+    timestamp: 'Aug 22, 2026',
+    created_at: '2026-08-22T08:45:00.000Z',
+    crop: 'Butterhead Lettuce',
+    condition: 'Healthy',
+    stage: 'Seedling',
+    growth_day: 8,
+    confidence: 0.92,
+    status: 'Optimized',
+    recommendation: 'Plant growth is in Seedling stage (Day 8). Maintain low EC and high humidity.'
+  }
+];
+
 export const AppProvider = ({ children }) => {
   // Load token from localStorage
   const [token, setToken] = useState(() => localStorage.getItem('hydrogrow_token'));
@@ -64,8 +132,17 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : null;
   });
 
-  // DB-synchronized prediction and conversation histories
-  const [savedPredictions, setSavedPredictions] = useState([]);
+  // DB-synchronized & localStorage-backed prediction and scan histories
+  const [savedPredictions, setSavedPredictions] = useState(() => {
+    const saved = localStorage.getItem('hydrogrow_saved_predictions');
+    return saved ? JSON.parse(saved) : DEFAULT_SAVED_PREDICTIONS;
+  });
+
+  const [plantDoctorScans, setPlantDoctorScans] = useState(() => {
+    const saved = localStorage.getItem('hydrogrow_plant_doctor_scans');
+    return saved ? JSON.parse(saved) : DEFAULT_PLANT_DOCTOR_SCANS;
+  });
+
   const [conversations, setConversations] = useState([]);
   const [activeConversationId, setActiveConversationId] = useState(() => {
     const saved = localStorage.getItem('hydrogrow_active_conv_id');
@@ -94,6 +171,14 @@ export const AppProvider = ({ children }) => {
       localStorage.removeItem('hydrogrow_prediction');
     }
   }, [predictionResult]);
+
+  useEffect(() => {
+    localStorage.setItem('hydrogrow_saved_predictions', JSON.stringify(savedPredictions));
+  }, [savedPredictions]);
+
+  useEffect(() => {
+    localStorage.setItem('hydrogrow_plant_doctor_scans', JSON.stringify(plantDoctorScans));
+  }, [plantDoctorScans]);
 
   useEffect(() => {
     localStorage.setItem('hydrogrow_chat_history', JSON.stringify(chatHistory));
@@ -132,13 +217,17 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem('hydrogrow_token', token);
         const payload = parseJwt(token);
         if (payload) {
-          setUserProfile({
+          const profile = {
             id: payload.user_id,
+            name: payload.sub,
             username: payload.sub,
             email: payload.email || `${payload.sub}@hydrogrow.ai`,
-            role: 'Head Grower',
+            role: payload.role || 'Lead Grower',
+            farmName: payload.farm_name || 'Demo Hydro Farm',
             greenhouseId: 'GH-Alpha-01'
-          });
+          };
+          setUserProfile(profile);
+          setUser(profile);
           setIsAuthenticated(true);
         } else {
           // Token corrupted
@@ -169,7 +258,7 @@ export const AppProvider = ({ children }) => {
   const fetchPredictionHistory = async () => {
     try {
       const res = await client.get('/api/history/predictions');
-      setSavedPredictions(res.data);
+      setSavedPredictions(res.data || []);
     } catch (err) {
       console.error('Failed to fetch predictions history:', err);
     }
@@ -178,7 +267,7 @@ export const AppProvider = ({ children }) => {
   const fetchConversations = async () => {
     try {
       const res = await client.get('/api/history/chats');
-      setConversations(res.data);
+      setConversations(res.data || []);
     } catch (err) {
       console.error('Failed to fetch conversations:', err);
     }
@@ -190,7 +279,7 @@ export const AppProvider = ({ children }) => {
     try {
       const res = await client.get(`/api/history/chats/${convId}`);
       // Map API messages (role, content, sources) to local structure
-      const mapped = res.data.map((m) => ({
+      const mapped = (res.data || []).map((m) => ({
         id: m.id,
         role: m.role,
         content: m.content,
@@ -212,6 +301,19 @@ export const AppProvider = ({ children }) => {
     try {
       const res = await client.post('/api/auth/login', { username, password });
       setToken(res.data.access_token);
+      if (res.data.user) {
+        const u = {
+          id: res.data.user.id,
+          name: res.data.user.username,
+          username: res.data.user.username,
+          email: res.data.user.email,
+          role: res.data.user.role || 'Lead Grower',
+          farmName: res.data.user.farm_name || 'Demo Hydro Farm',
+          greenhouseId: 'GH-Alpha-01'
+        };
+        setUserProfile(u);
+        setUser(u);
+      }
       return res.data;
     } catch (err) {
       const msg = err.response?.data?.detail || 'Authentication failed.';
@@ -271,23 +373,64 @@ export const AppProvider = ({ children }) => {
     setPredictionError(null);
   };
 
-  const saveCurrentPrediction = async (label) => {
+  const saveCurrentPrediction = async (customLabel) => {
+    const rawWeight = predictionResult?.predicted_yield_grams ?? predictionResult?.prediction?.predicted_weight ?? 382.7;
+    const numericWeight = typeof rawWeight === 'number' ? rawWeight : parseFloat(rawWeight) || 382.7;
+    const cat = predictionResult?.growth_category || predictionResult?.prediction?.growth_category || (numericWeight > 320 ? '🌟 Excellent' : '✅ Good');
+    const rawConf = predictionResult?.confidence_score ?? 0.91;
+    const normalizedConf = rawConf > 1.0 ? rawConf / 100 : rawConf;
+
     const newEntry = {
-      id: Date.now(),
-      label: label || 'Saved Batch Run',
-      timestamp: new Date().toLocaleDateString(),
-      predicted_weight: predictionResult?.predicted_yield_grams || 382.7,
-      inputs: predictionInputs,
+      id: `yield-${Date.now()}`,
+      label: customLabel || `Forecast #${savedPredictions.length + 215} - ${numericWeight.toFixed(1)}g`,
+      timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      created_at: new Date().toISOString(),
+      crop: 'Butterhead Lettuce',
+      predicted_weight: numericWeight,
+      confidence_score: normalizedConf,
+      growth_category: cat,
+      status: cat.includes('Poor') || cat.includes('Attention') ? 'Attention' : 'Optimized',
+      inputs: { ...predictionInputs },
+      input_parameters: { ...predictionInputs },
       result: predictionResult
     };
-    setSavedPredictions((prev) => [newEntry, ...prev]);
+
+    setSavedPredictions((prev) => [newEntry, ...prev.filter(p => p.id !== newEntry.id)]);
+
     try {
       if (token) {
         await client.post('/api/history/predictions', newEntry);
       }
     } catch (err) {
-      console.warn('API save fallback: Saved locally', err);
+      console.warn('API save fallback: Persisted locally in state & localStorage', err);
     }
+    return newEntry;
+  };
+
+  const deleteSavedPrediction = (id) => {
+    setSavedPredictions((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const savePlantDoctorScan = (scanData) => {
+    const newScan = {
+      id: scanData.id || `scan-${Date.now()}`,
+      label: scanData.label || `Leaf Scan #${plantDoctorScans.length + 102} - ${scanData.nutrient_prediction?.condition || scanData.condition || 'Healthy'}`,
+      timestamp: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      created_at: new Date().toISOString(),
+      crop: scanData.crop || 'Butterhead Lettuce',
+      condition: scanData.nutrient_prediction?.condition || scanData.condition || 'Healthy',
+      stage: scanData.growth_prediction?.stage || scanData.stage || 'Vegetative',
+      growth_day: scanData.growth_prediction?.growth_day ?? scanData.growth_day ?? 15,
+      confidence: scanData.confidence || scanData.nutrient_prediction?.confidence || 0.95,
+      status: (scanData.nutrient_prediction?.condition || scanData.condition) === 'Healthy' ? 'Optimized' : 'Attention',
+      recommendation: scanData.recommendation || 'Maintain standard nutrient schedule.'
+    };
+    setPlantDoctorScans((prev) => [newScan, ...prev.filter(s => s.id !== newScan.id)]);
+    return newScan;
+  };
+
+  const deletePlantDoctorScan = (id) => {
+    setPlantDoctorScans((prev) => prev.filter((item) => item.id !== id));
   };
 
   // Helper to extract clean prediction context
@@ -556,6 +699,10 @@ export const AppProvider = ({ children }) => {
       predictionResult,
       chatHistory,
       savedPredictions,
+      plantDoctorScans,
+      deleteSavedPrediction,
+      savePlantDoctorScan,
+      deletePlantDoctorScan,
       conversations,
       activeConversationId,
       isPredicting,

@@ -30,9 +30,13 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     password_hash = security.get_password_hash(user.password)
     return crud.create_user(db, user=user, password_hash=password_hash)
 
-@router.post("/login", response_model=schemas.Token, summary="Authenticate and return access token")
+@router.post("/login", summary="Authenticate and return access token and user info")
 def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
+    # Support login via username OR email
     user = crud.get_user_by_username(db, username=login_data.username)
+    if not user:
+        user = crud.get_user_by_email(db, email=login_data.username)
+        
     if not user or not security.verify_password(login_data.password, user.password_hash):
          raise HTTPException(
              status_code=status.HTTP_401_UNAUTHORIZED,
@@ -40,15 +44,36 @@ def login_user(login_data: LoginRequest, db: Session = Depends(get_db)):
              headers={"WWW-Authenticate": "Bearer"},
          )
     
+    farm_name = getattr(user, 'farm_name', None) or "Demo Hydro Farm"
+    role = getattr(user, 'role', None) or "Lead Grower"
+    
     access_token = jwt_handler.create_access_token(
-        data={"sub": user.username, "user_id": user.id}
+        data={
+            "sub": user.username,
+            "user_id": user.id,
+            "email": user.email,
+            "farm_name": farm_name,
+            "role": role
+        }
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "farm_name": farm_name,
+            "role": role
+        }
+    }
 
 # Supporting Swagger Form Login Flow as well
 @router.post("/swagger-login", response_model=schemas.Token, include_in_schema=False)
 def login_for_swagger(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = crud.get_user_by_username(db, username=form_data.username)
+    if not user:
+        user = crud.get_user_by_email(db, email=form_data.username)
     if not user or not security.verify_password(form_data.password, user.password_hash):
          raise HTTPException(
              status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,7 +81,16 @@ def login_for_swagger(form_data: OAuth2PasswordRequestForm = Depends(), db: Sess
              headers={"WWW-Authenticate": "Bearer"},
          )
     
+    farm_name = getattr(user, 'farm_name', None) or "Demo Hydro Farm"
+    role = getattr(user, 'role', None) or "Lead Grower"
+    
     access_token = jwt_handler.create_access_token(
-        data={"sub": user.username, "user_id": user.id}
+        data={
+            "sub": user.username,
+            "user_id": user.id,
+            "email": user.email,
+            "farm_name": farm_name,
+            "role": role
+        }
     )
     return {"access_token": access_token, "token_type": "bearer"}

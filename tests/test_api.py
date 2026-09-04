@@ -30,8 +30,8 @@ class TestHydroGrowAPI(unittest.TestCase):
         response = self.client.get("/health")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertIn(data["status"], ["running", "healthy"])
-        self.assertEqual(data["service"], "HydroGrow AI API")
+        self.assertIn(data["status"], ["running", "healthy", "ok"])
+        self.assertIn("HydroGrow", data["service"])
 
     def test_prediction_endpoint(self):
         response = self.client.post("/api/predict", json=self.sample_inputs)

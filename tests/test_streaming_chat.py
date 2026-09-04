@@ -10,15 +10,17 @@ from backend.authentication import jwt_handler
 class TestStreamingChatAPI(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=engine, checkfirst=True)
         cls.client = TestClient(app)
         
         # Create test grower for authenticated stream checks
+        import uuid
+        cls.uid = str(uuid.uuid4())[:8]
         cls.db = SessionLocal()
         user_schema = schemas.UserCreate(
-            username="streamgrower",
-            email="streamgrower@example.com",
-            password="growerpassword"
+            username=f"streamgrower_{cls.uid}",
+            email=f"streamgrower_{cls.uid}@example.com",
+            password="streampassword"
         )
         cls.user = crud.create_user(cls.db, user=user_schema, password_hash="hashed_password_val")
         cls.db.commit()

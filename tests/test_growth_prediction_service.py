@@ -50,23 +50,31 @@ def test_growth_prediction_service_direct():
     assert len(result["recommendation"]) > 0
 
 def test_fastapi_predict_growth_endpoint():
-    # Find a real image sample from dataset
+    # Find a real lettuce leaf sample image
     sample_img_path = None
-    dataset_dir = os.path.join(PROJECT_ROOT, "data", "growth_dataset")
-    
-    for root, dirs, files in os.walk(dataset_dir):
-        for f in files:
-            if f.endswith('.png'):
-                sample_img_path = os.path.join(root, f)
-                break
-        if sample_img_path:
+    possible_paths = [
+        os.path.join(PROJECT_ROOT, "data", "growth_dataset", "lettuce_0000.png"),
+        os.path.join(PROJECT_ROOT, "data", "plant_dataset", "healthy", "fn1.png")
+    ]
+    for p in possible_paths:
+        if os.path.exists(p):
+            sample_img_path = p
             break
+    if sample_img_path and os.path.exists(sample_img_path):
+        with open(sample_img_path, 'rb') as f:
+            img_bytes = f.read()
+    else:
+        from PIL import Image
+        import io
+        img = Image.new("RGB", (224, 224), (35, 175, 45))
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        img_bytes = buf.getvalue()
 
-    with open(sample_img_path, 'rb') as f:
-        response = client.post(
-            "/api/vision/predict-growth",
-            files={"file": ("test_plant.png", f, "image/png")}
-        )
+    response = client.post(
+        "/api/vision/predict-growth",
+        files={"file": ("test_plant.png", img_bytes, "image/png")}
+    )
         
     assert response.status_code == 200, f"API failed with {response.status_code}: {response.text}"
     data = response.json()

@@ -1,654 +1,155 @@
-# 🌱 HydroGrow AI
-## Autonomous AI-Powered Hydroponic Agriculture Intelligence Platform
+# HydroGrow AI — Multi-Modal Precision Agriculture Platform
 
-<p align="center">
-  <img src="https://img.shields.io/badge/AI-Agriculture%20Intelligence-00A86B?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/ML-Prediction%20Engine-blue?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/IoT-Smart%20Farming-orange?style=for-the-badge"/>
-  <img src="https://img.shields.io/badge/Full%20Stack-React%20%2B%20FastAPI-purple?style=for-the-badge"/>
-</p>
+[![React 18](https://img.shields.io/badge/Frontend-React%2018%20%2B%20Vite-61DAFB?logo=react&logoColor=black)](https://reactjs.org/)
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![PyTorch](https://img.shields.io/badge/Computer%20Vision-PyTorch%202.x-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Scikit-Learn](https://img.shields.io/badge/ML%20Regression-Scikit--Learn-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-38B2AC?logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
 
-
-## 🌐 Live Deployment
-
-🚀 **Production Frontend:**  
-https://hydro-grow-ai.vercel.app
-
-
-📦 **GitHub Repository:**  
-https://github.com/VenkataKarthikeya-eng/HydroGrow-AI
-
+**HydroGrow AI** is an open-source, multi-modal precision agriculture platform designed for commercial hydroponic lettuce cultivation. It integrates deep learning computer vision, calibrated tabular yield regression, and a physics-informed digital twin simulation engine into a unified web application.
 
 ---
 
-# 📌 Overview
+## 📸 Application Showcase
 
-**HydroGrow AI** is an autonomous smart agriculture intelligence platform designed to transform traditional hydroponic farming into a data-driven, AI-powered ecosystem.
+### 1. Executive Dashboard & Plant Doctor Scanner
+| Executive Dashboard | Plant Doctor Vision Diagnosis |
+| :---: | :---: |
+| ![Dashboard Overview](docs/screenshots/dashboard.png) | ![Plant Doctor Result](docs/screenshots/plant_doctor_result.png) |
 
-The platform combines:
-
-- Artificial Intelligence
-- Machine Learning
-- Computer Vision
-- IoT Sensor Networks
-- Digital Twin Simulation
-- Farm Automation
-- Cloud Infrastructure
-- Multi-Tenant SaaS Architecture
-
-to help growers maximize crop yield, optimize resources, detect plant issues early, and make intelligent farming decisions.
+### 2. Tabular Yield Predictor & Scan Audit Trail
+| Fresh Weight Yield Predictor | Telemetry History & Audit Log |
+| :---: | :---: |
+| ![Yield Predictor](docs/screenshots/yield_predictor.png) | ![Scan History](docs/screenshots/history_page.png) |
 
 ---
 
-# 🔬 Plant Doctor AI Scanner
+## 🌟 Core Features
 
-HydroGrow AI provides a Deep Learning based lettuce health analysis system using three AI models.
-
-## 🌱 Model 1 — Growth Prediction (EfficientNetB0)
-
-Predicts:
-
-- Growth Stage
-- Growth Day
-- Harvest Readiness
-
-Dataset:
-- 124,486 hydroponic lettuce images
-
-Stages:
-- Seedling
-- Vegetative
-- Mature / Harvest
-
-
-## 🧪 Model 2 — Nutrient Deficiency Detection (MobileNetV3Small)
-
-Detects:
-
-- Healthy
-- Nitrogen Deficiency
-- Phosphorus Deficiency
-- Potassium Deficiency
-
-
-## 🛡️ Model 3 — Crop Validation AI Guard
-
-Validates uploaded images before diagnosis.
-
-Rejects:
-
-- Documents
-- Random objects
-- Other plant leaves
-
-Allows:
-
-- Lettuce leaf images only
-
-
-## AI Pipeline
-React Plant Doctor
-|
-↓
-FastAPI Vision API
-|
-↓
-Crop Validation Model
-|
-↓
-Growth Model + Nutrient Model
-|
-↓
-AI Cultivation Recommendation
-
-
-
-## Model Performance
-
-| Model | Architecture | Purpose |
-|-|-|-|
-| Growth Prediction | EfficientNetB0 | Growth stage & age |
-| Nutrient Detection | MobileNetV3Small | NPK deficiency detection |
-| Crop Validation | MobileNetV3Small | Lettuce image verification |
-
-# 🎯 Problem Statement
-
-Modern hydroponic farms face challenges:
-
-- Manual monitoring of crop conditions
-- Nutrient imbalance detection
-- Disease identification delays
-- Poor yield prediction
-- Inefficient resource utilization
-- Lack of intelligent decision support
-
-
-HydroGrow AI solves these problems by creating an autonomous agriculture intelligence layer.
-
+- **🌿 Plant Doctor Vision Scanner**:
+  - **Crop Validation Gate**: Verifies leaf identity (98% accuracy) to filter non-lettuce and non-leaf objects.
+  - **Growth Stage & Age Regressor**: Classifies stage (Seedling, Vegetative, Mature) and estimates exact age (1–30 days) with 1.85 days MAE.
+  - **NPK Deficiency Diagnoser**: Identifies Healthy, Nitrogen (N), Phosphorus (P), and Potassium (K) deficiencies with actionable agronomist remediation advice.
+- **📈 Calibrated Yield Predictor**:
+  - Predicts final fresh harvest weight ($g$) from 13 continuous environmental, water chemistry, and fertigation parameters using a calibrated Random Forest regression pipeline ($R^2 = 0.665$, $\text{MAE} = 26.2\text{g}$).
+- **🌐 Physics-Informed Digital Twin Simulator**:
+  - Real-time side-by-side simulation laboratory comparing 30-day crop growth curves against optimal baselines.
+  - Interactive virtual greenhouse sliders (Temperature, Humidity, EC, pH) and one-click *Apply AI Recipe* action.
+- **📜 Persistent History & User Profile**:
+  - Full audit logging of vision scans and yield predictions with instant parameter reloading and JWT-synced user profiles.
 
 ---
 
-# 🚀 Key Features
+## 🔬 Production Machine Learning Suite
 
-
-# 🤖 Artificial Intelligence Engine
-
-### AI Farming Copilot
-
-Provides intelligent agricultural assistance using:
-
-- Crop knowledge retrieval
-- Farming recommendations
-- Decision support
-- Strategy generation
-
-
-### Autonomous Farm Intelligence
-
-The platform analyzes:
-
-- Farm performance
-- Crop health
-- Production efficiency
-- Market conditions
-
-and generates optimization strategies.
-
+| Model | Target Task | Base Architecture | Dataset Count | Primary Performance Metric | Production File |
+| :--- | :--- | :--- | :---: | :--- | :--- |
+| **Crop Validator** | 3-Class Validation Gate | MobileNetV3-Small | 300 images | **Accuracy: 98.0%** (F1: 0.98) | `ml/models/crop_validator_model.pth` |
+| **Growth Predictor** | 3 Stages + Age Day Regressor | Dual-Head EfficientNet-B0 | 240 images | **Stage Acc: 93.3%** \| **MAE: 1.85 days** | `ml/models/growth_model.pth` |
+| **Nutrient Diagnoser**| 4-Class NPK Deficiency | MobileNetV3-Small | 208 images | **Accuracy: 91.5%** (F1: 0.91) | `ml/models/nutrient_model.pth` |
+| **Yield Predictor** | Fresh Harvest Weight ($g$) | StandardScaler + RandomForest | 216 records | **$R^2 = 0.665$** \| **$\text{MAE} = 26.2\text{g}$** | `ml/models/hydrogrow_final_model.pkl` |
 
 ---
 
-# 🧠 Machine Learning Platform
+## 📓 Scientific Evaluation Notebooks
 
-## Growth Prediction Engine
+All 7 evaluation notebooks in [`ml/notebooks/`](ml/notebooks/) are pre-rendered with complete stdout metrics, tables, and confusion matrices:
 
-Predicts:
-
-- Expected biomass
-- Growth rate
-- Harvest timeline
-- Crop performance
-
-
-Implemented with:
-
-- Data preprocessing pipeline
-- ML regression models
-- Model evaluation system
-- Production inference engine
-
-
-## Plant Disease Detection
-
-Computer vision pipeline supports:
-
-- Healthy plants
-- Nutrient deficiency
-- Root stress
-- Leaf diseases
-- Fungal symptoms
-
-
-## Model Management
-
-Includes:
-
-- Model registry
-- Training pipeline
-- Performance tracking
-- Prediction logging
-
+- [`01_Data_Understanding.ipynb`](ml/notebooks/01_Data_Understanding.ipynb): Dataset exploration, sensor distributions & correlation analysis.
+- [`02_Data_Preprocessing.ipynb`](ml/notebooks/02_Data_Preprocessing.ipynb): Data cleaning, outlier handling & feature scaling pipeline.
+- [`03_Crop_Validation_Evaluation.ipynb`](ml/notebooks/03_Crop_Validation_Evaluation.ipynb): 3-class MobileNetV3 validation metrics and sample prediction tests.
+- [`04_Growth_Model_Evaluation.ipynb`](ml/notebooks/04_Growth_Model_Evaluation.ipynb): Dual-Head EfficientNet-B0 stage classification and age day regression.
+- [`05_Nutrient_Model_Evaluation.ipynb`](ml/notebooks/05_Nutrient_Model_Evaluation.ipynb): 4-class NPK deficiency classification and confusion matrices.
+- [`06_Yield_Predictor_Evaluation.ipynb`](ml/notebooks/06_Yield_Predictor_Evaluation.ipynb): Calibrated Random Forest regression metrics and top feature importance.
+- [`07_Final_Model_Report.ipynb`](ml/notebooks/07_Final_Model_Report.ipynb): Consolidated machine learning benchmarks and production scorecard.
 
 ---
 
-# 🌱 Smart Hydroponic Management
-
-
-## Crop Lifecycle Intelligence
-
-Tracks:
-
-- Growth stages
-- Environmental conditions
-- Nutrient requirements
-- Harvest readiness
-
-
-## Plant Health Monitoring
-
-Provides:
-
-- Health scoring
-- Stress detection
-- Growth analytics
-
-
----
-
-# 📡 IoT Smart Farming Infrastructure
-
-
-Supports hardware integration:
-
-- ESP32
-- Raspberry Pi
-- Arduino
-
-
-Capabilities:
-
-✅ Sensor data ingestion  
-✅ MQTT communication  
-✅ Device management  
-✅ Real-time telemetry streaming  
-✅ Live farm monitoring  
-
-
----
-
-# 🏭 Digital Twin Simulation
-
-
-HydroGrow AI provides a virtual representation of farming environments.
-
-Features:
-
-- Greenhouse simulation
-- Crop lifecycle modelling
-- Environmental monitoring
-- Predictive farm scenarios
-
-
----
-
-# ☁️ Cloud & Production Architecture
-
-
-Implemented enterprise capabilities:
-
-## Security
-
-- Environment based configuration
-- Secure API handling
-- Security middleware
-- Production logging
-
-
-## Deployment Infrastructure
-
-Includes:
-
-- Docker readiness
-- CI/CD preparation
-- Health monitoring
-- Cloud deployment architecture
-
-
----
-
-# 🏢 Multi-Farm SaaS Platform
-
-
-HydroGrow AI supports enterprise farming operations.
-
-
-## Multi-Tenant Architecture
-
-Features:
-
-- Multiple farms
-- Farm isolation
-- Greenhouse management
-- Team collaboration
-
-
-## Role Based Access Control
-
-Supported roles:
-
-| Role | Permission |
-|-|-|
-| Owner | Full control |
-| Manager | Farm operations |
-| Worker | Daily activities |
-| Viewer | Read-only access |
-
-
-## Subscription System
-
-Plans:
-
-- FREE
-- BASIC
-- PRO
-- ENTERPRISE
-
-
----
-
-# 🌍 Agriculture Knowledge Ecosystem
-
-
-## Marketplace
-
-Provides:
-
-- Agricultural resources
-- Crop templates
-- Farming solutions
-
-
-## Farmer Community
-
-Features:
-
-- Knowledge sharing
-- Collaboration
-- Expert interaction
-
-
-## Expert Recommendation System
-
-Matches farmers with experts based on:
-
-- Crop type
-- Problem category
-- Region
-
-
----
-
-# 📊 Global Farm Intelligence
-
-
-The final intelligence layer provides:
-
-
-## Farm Intelligence Score
-
-Evaluates:
-
-- Productivity
-- Crop performance
-- Resource efficiency
-
-
-## Profitability Analysis
-
-Analyzes:
-
-- Production cost
-- Expected revenue
-- Crop profitability
-
-
-## Market Intelligence
-
-Provides:
-
-- Crop demand trends
-- Market insights
-- Strategy recommendations
-
-
-## Autonomous Strategy Planner
-
-Generates:
-
-- Long-term farm optimization plans
-- Crop improvement recommendations
-
-
----
-
-# 🏗️ System Architecture
-
-
-```
-                 HydroGrow AI Platform
-
-                         |
-        -------------------------------------
-        |                 |                 |
-     Frontend          Backend             AI
-      React            FastAPI          ML Engine
-
-        |                 |                 |
-
-    Dashboard        REST APIs        Prediction Models
-
-        |
-        |
-     IoT Layer
- ESP32 / Raspberry Pi / Arduino
-
-        |
-        |
-   Sensor Telemetry
-
+## 🚀 Quickstart: Run Step-by-Step in VS Code
+
+### Prerequisites
+- Python 3.11 (`hydrogrow-env` virtual environment)
+- Node.js 18+ and npm
+
+### 1. Terminal 1: Core Backend API (Port 8000)
+```powershell
+cd e:\HydroGrow-AI\backend
+..\hydrogrow-env\Scripts\activate
+uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-
----
-
-# 🛠️ Technology Stack
-
-
-## Frontend
-
-- React.js
-- Vite
-- Tailwind CSS
-- React Router
-- Axios
-
-
-## Backend
-
-- FastAPI
-- Python
-- SQLAlchemy
-- Alembic
-- PostgreSQL
-- SQLite
-
-
-## Artificial Intelligence
-
-- Scikit-Learn
-- Machine Learning Pipelines
-- Computer Vision
-- AI Knowledge Engine
-
-
-## IoT
-
-- MQTT
-- WebSockets
-- Sensor Telemetry
-
-
-## Deployment
-
-- Vercel
-- Docker
-- GitHub Actions
-- Cloud Ready Architecture
-
-
----
-
-# 📂 Project Structure
-
-
+### 2. Terminal 2: AI Vision Backend (Port 8001)
+```powershell
+cd e:\HydroGrow-AI\ai_backend
+..\hydrogrow-env\Scripts\activate
+uvicorn main:app --host 127.0.0.1 --port 8001 --reload
 ```
+
+### 3. Terminal 3: Frontend Development Server (Port 3000)
+```powershell
+cd e:\HydroGrow-AI\frontend
+npm run dev
+```
+
+### 4. Access in Your Browser
+- **Frontend UI**: [http://localhost:3000](http://localhost:3000)
+- **Core Backend Swagger API**: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+- **AI Vision Swagger API**: [http://127.0.0.1:8001/docs](http://127.0.0.1:8001/docs)
+
+---
+
+## 📁 Repository Structure
+
+```text
 HydroGrow-AI/
-
+├── ai_backend/                 # Vision Inference Service (Port 8001)
+│   ├── ml_models/             # PyTorch model weights (.pth)
+│   ├── services/              # Crop validation, growth, and nutrient inference
+│   └── main.py                # FastAPI entry point
 │
-├── backend/
-│   ├── api/
-│   ├── models/
-│   ├── services/
-│   ├── ml/
-│   └── database/
+├── backend/                    # Core Business & Auth API (Port 8000)
+│   ├── api/                   # Auth, history, and prediction routes
+│   ├── database/              # SQLAlchemy database configuration and models
+│   ├── ml_models/             # PyTorch & Scikit-Learn model checkpoints
+│   ├── services/              # Yield prediction and business logic
+│   └── api/main.py            # FastAPI entry point
 │
-├── frontend/
+├── data/                       # Datasets & Processed Telemetry
+│   ├── crop_validator_dataset/ # 300 validation images
+│   ├── growth_dataset/         # 240 lifecycle images
+│   ├── nutrient_dataset/       # 208 NPK deficiency images
+│   ├── processed/              # final_ml_dataset.csv (216 experiment rows)
+│   └── raw/                    # Raw telemetry data
+│
+├── frontend/                   # React 18 + Vite Web Application (Port 3000)
+│   ├── public/                # Static assets (sample_lettuce_leaf.png)
 │   ├── src/
-│   ├── components/
-│   ├── pages/
-│   └── dashboard/
+│   │   ├── components/        # UI components (SaaSNavbar, Card, Button, Badge)
+│   │   ├── context/           # AppContext.jsx (Auth, Profile, History State)
+│   │   ├── pages/             # Dashboard, Plant Doctor, Yield Predictor,
+│   │   │   ├── app/           # AIPredictionWizard, SimulationLab, PlantDoctor
+│   │   │   ├── Profile.jsx    # Live User Profile
+│   │   │   └── PredictionHistory.jsx # Historical Scans & Predictions
+│   │   └── services/          # cropSimulationEngine.js & API clients
+│   └── package.json
 │
-├── tests/
-├── docs/
-├── deployment/
-├── data/
-└── README.md
-
+├── ml/                         # Machine Learning Pipeline & Notebooks
+│   ├── models/                # Production model checkpoints (.pth, .pkl, .joblib)
+│   └── notebooks/             # 7 Pre-executed Jupyter Evaluation Notebooks
+│
+├── HydroGrow_AI_Final_Project_Report.md  # Comprehensive Master Project Report
+└── README.md                   # Repository Quickstart & Reference
 ```
-
 
 ---
 
-# 🧪 Testing & Verification
+## 📄 Documentation
 
-
-Backend Test Suite:
-
-```
-python -m unittest discover -s tests
-```
-
-
-Latest verification:
-
-```
-163 / 163 tests passed ✅
-```
-
-
-Frontend Production Build:
-
-```
-npm run build
-```
-
-
-Result:
-
-```
-Vite production build completed successfully with 0 errors ✅
-```
-
+For the exhaustive technical report containing mathematical derivations, architectural diagrams, deep ML benchmarks, and troubleshooting history, refer to:  
+👉 [**`HydroGrow_AI_Final_Project_Report.md`**](HydroGrow_AI_Final_Project_Report.md)
 
 ---
 
-# 📈 Development Journey
-
-
-## Phase 1-10
-Foundation Platform
-
-- Authentication
-- Analytics
-- Prediction system
-- IoT monitoring
-- Automation
-- Digital Twin
-
-
-## Phase 11
-Machine Learning Integration
-
-- Real ML models
-- Training pipeline
-- Evaluation metrics
-
-
-## Phase 12
-Production Engineering
-
-- Security
-- Logging
-- Docker
-- Deployment readiness
-
-
-## Phase 13
-Cloud + IoT Platform
-
-- Device management
-- MQTT communication
-- MLOps foundation
-
-
-## Phase 14
-Multi-Farm SaaS
-
-- Tenant architecture
-- RBAC
-- Subscription management
-
-
-## Phase 15
-Agriculture Ecosystem
-
-- Marketplace
-- Community
-- Expert network
-
-
-## Phase 16
-Autonomous Global Agriculture Intelligence
-
-- Farm scoring
-- Profit prediction
-- Market intelligence
-- AI strategy planning
-
-
----
-
-# 👨‍💻 Developer
-
-
-## Venkata Karthikeya Cherukuri
-
-Integrated M.Tech Software Engineering  
-VIT-AP University
-
-
-Interests:
-
-- Artificial Intelligence
-- Machine Learning
-- Full Stack Development
-- Smart Agriculture
-- Cloud Technologies
-
-
----
-
-# 🔮 Future Enhancements
-
-- Real greenhouse hardware deployment
-- Mobile application
-- Advanced Deep Learning models
-- Satellite agriculture integration
-- Large-scale cloud farming network
-
-
----
-
-# ⭐ Support
-
-If you find this project interesting:
-
-⭐ Star the repository  
-🍴 Fork the project  
-🚀 Share improvements  
-
-
----
-
-
-
-## Built with ❤️ for the future of intelligent agriculture
+## 👨‍💻 Author & Maintainer
+Designed & Developed by **Karthikeya Cherukuri**  
+*Built with Multi-Modal AI & Hydroponics Innovation.*

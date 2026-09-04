@@ -2,6 +2,7 @@ from typing import Optional, Any
 from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 from backend.services.prediction.prediction import predict
 from backend.services.intelligence.recommendation_engine import generate_recommendations
 from backend.services.intelligence.explanation_engine import generate_explanation

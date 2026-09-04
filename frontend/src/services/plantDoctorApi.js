@@ -1,9 +1,7 @@
 import axios from 'axios';
 
-const BASE_URL = (import.meta.env.VITE_AI_API_URL && import.meta.env.VITE_AI_API_URL.trim() !== '') 
-  ? import.meta.env.VITE_AI_API_URL 
-  : (import.meta.env.VITE_API_BASE_URL || 'https://hydrogrow-ai-plant-doctor.onrender.com');
-const TIMEOUT_MS = 45000; // 45 second timeout to allow for Render free tier cold-start model loading
+const BASE_URL = import.meta.env.VITE_AI_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+const TIMEOUT_MS = 45000;
 
 /**
  * Plant Doctor API Service for HydroGrow AI Render Backend Integration

@@ -1,34 +1,68 @@
+# Node & Frontend Build
 node_modules/
 dist/
-.env
 frontend/node_modules/
 frontend/dist/
 
+# Environment Variables & Local Secrets
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Databases
+# Virtual Environments
+venv/
+.venv/
+env/
+hydrogrow-env/
+ai_backend/venv/
+test-fresh-env/
+
+# Databases & Backups
 *.db
+*.sqlite
+*.sqlite3
+test_hydrogrow.db
+backups/
+*.sql
 
-# Environment
-.env
+# Uploads & Runtime Artifacts
+uploads/
+backend/uploads/
+backend/uploads/plant_images/*
+!backend/uploads/plant_images/.gitkeep
 
-# ML datasets
+# ML Datasets & Cache
 data/growth_dataset/
 data/nutrient_dataset/
 data/leaf_validator_dataset/
 data/crop_validator_dataset/
-
-# Training outputs & Model Binaries
 *.keras
-
-# Virtual Environment
-venv/
-ai_backend/venv/
-.venv/
-hydrogrow-env/
-
-# Logs & Cache
 *.log
 .pytest_cache/
+.ipynb_checkpoints/
+

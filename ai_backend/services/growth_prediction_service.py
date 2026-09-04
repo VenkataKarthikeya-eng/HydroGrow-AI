@@ -25,10 +25,11 @@ BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
 
 candidates = [
-    Path("/app/ml_models/growth_model.keras"),
+    PROJECT_ROOT / "ml_models" / "growth_model.pth",
+    PROJECT_ROOT.parent / "backend" / "ml_models" / "growth_model.pth",
+    PROJECT_ROOT.parent / "ml" / "models" / "growth_model.pth",
     PROJECT_ROOT / "ml_models" / "growth_model.keras",
     PROJECT_ROOT.parent / "ml" / "models" / "growth_model.keras",
-    PROJECT_ROOT / "ml" / "models" / "growth_model.keras",
 ]
 MODEL_PATH = candidates[0]
 for cand in candidates:
@@ -59,18 +60,21 @@ class GrowthPredictionService:
     def _load_model(self):
         if self.model_path.exists():
             try:
-                if HAS_TF:
-                    self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
-                    print("Growth Model Loaded [OK]")
-                elif HAS_KERAS:
+                if HAS_KERAS:
                     self.model = keras.models.load_model(str(self.model_path), compile=False)
-                    print("Growth Model Loaded [OK]")
+                    print(f"[Model Loader] Growth Model loaded successfully from '{self.model_path}' [OK]")
+                elif HAS_TF:
+                    self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
+                    print(f"[Model Loader] Growth Model loaded successfully from '{self.model_path}' [OK]")
                 else:
-                    print(f"[GrowthPredictionService] Neither TensorFlow nor Keras is available to load {self.model_path}")
+                    print(f"[Model Loader] Growth Model loading FAILED: Neither Keras nor TensorFlow available to load '{self.model_path}'. Fallback mode active.")
                     self.model = None
             except Exception as e:
-                print(f"[GrowthPredictionService] Error loading growth model: {e}")
+                print(f"[Model Loader] Growth Model loading FAILED from '{self.model_path}': {e}. Fallback mode active.")
                 self.model = None
+        else:
+            print(f"[Model Loader] Growth Model file NOT FOUND at '{self.model_path}'. Fallback mode active.")
+            self.model = None
 
     def warm_up(self):
         """Warm up TensorFlow model execution graph during startup."""
@@ -99,6 +103,8 @@ class GrowthPredictionService:
         else:
             image = None
 
+        prediction_source = "ml_model"
+
         if self.model is not None:
             try:
                 if arr_input is not None:
@@ -113,7 +119,8 @@ class GrowthPredictionService:
                 preds = self.model(arr, training=False) if callable(self.model) else self.model.predict(arr)
                 if isinstance(preds, (list, tuple)):
                     logits = preds[0][0].numpy() if hasattr(preds[0][0], 'numpy') else np.array(preds[0][0])
-                    day_pred = float(preds[1][0].numpy() if hasattr(preds[1][0], 'numpy') else preds[1][0])
+                    day_pred_raw = preds[1][0].numpy() if hasattr(preds[1][0], 'numpy') else preds[1][0]
+                    day_pred = float(np.squeeze(day_pred_raw))
                 else:
                     logits = preds[0].numpy() if hasattr(preds[0], 'numpy') else np.array(preds[0])
                     day_pred = 15.0
@@ -126,21 +133,26 @@ class GrowthPredictionService:
                 predicted_stage = STAGE_CLASSES[pred_class_idx]
                 min_d, max_d = STAGE_DAY_ESTIMATES[predicted_stage]
                 growth_day = int(np.clip(round(day_pred), min_d, max_d))
-            except Exception:
+            except Exception as ex:
+                print(f"[GrowthPrediction] Model inference failed: {ex}. Using computer vision fallback.")
                 predicted_stage, growth_day, confidence = self._cv_fallback(image)
+                prediction_source = "fallback"
         else:
+            print("[GrowthPrediction] Model unavailable. Fallback mode active (OpenCV color heuristics).")
             predicted_stage, growth_day, confidence = self._cv_fallback(image)
+            prediction_source = "fallback"
 
         recommendation = STAGE_RECOMMENDATIONS.get(predicted_stage, "Continue nutrient schedule.")
         t_elapsed = time.perf_counter() - t0
 
-        print(f"[Growth Debug] stage={predicted_stage}, day={growth_day}, confidence={confidence:.4f}")
+        print(f"[Growth Debug] stage={predicted_stage}, day={growth_day}, confidence={confidence:.4f}, source={prediction_source}")
 
         result = {
             "growth_stage": predicted_stage,
             "growth_day": growth_day,
             "confidence": round(confidence, 2),
-            "recommendation": recommendation
+            "recommendation": recommendation,
+            "prediction_source": prediction_source
         }
         return result, t_elapsed
 

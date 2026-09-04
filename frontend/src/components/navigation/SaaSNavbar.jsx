@@ -45,197 +45,59 @@ export default function SaaSNavbar() {
                   : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              Overview
+              Dashboard
             </Link>
 
-            {/* AI Tools Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setActiveMenu('ai')}
-              onMouseLeave={() => setActiveMenu(null)}
-            >
-              <button
-                className={`px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 transition-colors ${
-                  ['/prediction', '/plant-doctor', '/simulation-lab', '/assistant'].some(p => isActive(p))
-                    ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'
-                    : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
-              >
-                <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>AI Tools</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
-              </button>
-
-              {activeMenu === 'ai' && (
-                <div className="absolute top-full left-0 w-64 pt-2">
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-2 space-y-1">
-                    <Link
-                      to="/prediction"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <Sparkles className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">AI Yield Wizard</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">3-Step ML Yield Forecast</div>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/plant-doctor"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <Camera className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">Plant Doctor Scanner</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Leaf Pathology Scanner</div>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/simulation-lab"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <Cpu className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">Simulation Lab</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Digital Twin Crop Simulator</div>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/assistant"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <Bot className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">Agronomist Copilot</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">RAG Crop Science AI</div>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Farm Intelligence Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setActiveMenu('intelligence')}
-              onMouseLeave={() => setActiveMenu(null)}
-            >
-              <button
-                className={`px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 transition-colors ${
-                  ['/crop-intelligence', '/iot-monitoring', '/automation'].some(p => isActive(p))
-                    ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'
-                    : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
-              >
-                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Farm Intelligence</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
-              </button>
-
-              {activeMenu === 'intelligence' && (
-                <div className="absolute top-full left-0 w-64 pt-2">
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-2 space-y-1">
-                    <Link
-                      to="/crop-intelligence"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <TrendingUp className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">Crop Intelligence</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Growth Cycle Analytics</div>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/iot-monitoring"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <Cpu className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">IoT Telemetry</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Real-Time Sensor Streams</div>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/automation"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <Sliders className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">Automation Controls</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Dosing Rules & Actuators</div>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Management Dropdown */}
-            <div 
-              className="relative"
-              onMouseEnter={() => setActiveMenu('management')}
-              onMouseLeave={() => setActiveMenu(null)}
-            >
-              <button
-                className={`px-3.5 py-2 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5 transition-colors ${
-                  ['/history/predictions', '/profile'].some(p => isActive(p))
-                    ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'
-                    : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
-                }`}
-              >
-                <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span>Management</span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
-              </button>
-
-              {activeMenu === 'management' && (
-                <div className="absolute top-full left-0 w-64 pt-2">
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-2 space-y-1">
-                    <Link
-                      to="/history/predictions"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <History className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">Prediction History</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">Historical Logs & PDF Reports</div>
-                      </div>
-                    </Link>
-
-                    <Link
-                      to="/profile"
-                      className="flex items-center gap-3 p-3 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/60 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                    >
-                      <Settings className="w-4 h-4 text-emerald-600" />
-                      <div>
-                        <div className="text-sm font-bold">Farm Settings</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">{user?.farmName || 'Demo Farm'}</div>
-                      </div>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-
             <Link
-              to="/marketplace"
-              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors flex items-center gap-1.5 ${
-                isActive('/marketplace')
+              to="/plant-doctor"
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors ${
+                isActive('/plant-doctor') || isActive('/plant-health')
                   ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'
                   : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              <Store className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              Marketplace
+              <Camera className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Plant Doctor</span>
+            </Link>
+
+            <Link
+              to="/prediction"
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors ${
+                isActive('/prediction')
+                  ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'
+                  : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Yield Predictor</span>
+            </Link>
+
+            <Link
+              to="/simulation"
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors ${
+                isActive('/simulation') || isActive('/digital-twin') || isActive('/twin')
+                  ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'
+                  : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              <Cpu className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Digital Twin</span>
+            </Link>
+
+            <Link
+              to="/history/predictions"
+              className={`px-3.5 py-2 rounded-lg text-sm font-semibold flex items-center gap-1.5 transition-colors ${
+                isActive('/history/predictions') || isActive('/history')
+                  ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60'
+                  : 'text-slate-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+              }`}
+            >
+              <History className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Scan History</span>
             </Link>
           </div>
 
-          {/* Right Actions (Matching Internshala Header Reference Image) */}
+          {/* Right Actions */}
           <div className="hidden md:flex items-center space-x-3">
             
             {/* Theme Toggle */}
@@ -247,7 +109,7 @@ export default function SaaSNavbar() {
               {theme === 'dark' ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5 text-slate-600" />}
             </button>
 
-            {/* User Profile Avatar with Dropdown (Matching Screenshot: 👤 Karthikeya ▼) */}
+            {/* User Profile Avatar with Dropdown */}
             <div className="relative pl-2">
               <button
                 onClick={() => setShowUserDropdown(!showUserDropdown)}
@@ -257,7 +119,7 @@ export default function SaaSNavbar() {
                   {user?.name ? user.name[0].toUpperCase() : 'K'}
                 </div>
                 <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-                  {user?.name || 'Karthikeya'}
+                  {user?.name || 'Grower'}
                 </span>
                 <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
               </button>
@@ -278,7 +140,7 @@ export default function SaaSNavbar() {
                     className="flex items-center gap-2 p-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl"
                   >
                     <History className="w-4 h-4 text-emerald-600" />
-                    Prediction History
+                    Scan History
                   </Link>
                   <button
                     onClick={() => {
@@ -319,34 +181,19 @@ export default function SaaSNavbar() {
 
       {/* Mobile Drawer Navigation */}
       {isMobileOpen && (
-        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-6 space-y-4">
+        <div className="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-6 space-y-3">
           <Link
             to="/dashboard"
             onClick={() => setIsMobileOpen(false)}
             className="block py-2 text-base font-bold text-slate-900 dark:text-white"
           >
-            Overview
+            Dashboard
           </Link>
-          
-          <div className="space-y-1">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">AI Tools</div>
-            <Link to="/prediction" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">AI Yield Wizard</Link>
-            <Link to="/plant-doctor" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">Plant Doctor Scanner</Link>
-            <Link to="/simulation-lab" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">Simulation Lab</Link>
-            <Link to="/assistant" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">Agronomist Copilot</Link>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Farm Intelligence</div>
-            <Link to="/crop-intelligence" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">Crop Intelligence</Link>
-            <Link to="/iot-monitoring" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">IoT Telemetry</Link>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Management</div>
-            <Link to="/history/predictions" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">Prediction History</Link>
-            <Link to="/profile" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm text-slate-700 dark:text-slate-300">Profile & Settings</Link>
-          </div>
+          <Link to="/plant-doctor" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Plant Doctor</Link>
+          <Link to="/prediction" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Yield Predictor</Link>
+          <Link to="/simulation" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Digital Twin</Link>
+          <Link to="/history/predictions" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Scan History</Link>
+          <Link to="/profile" onClick={() => setIsMobileOpen(false)} className="block py-1.5 text-sm font-semibold text-slate-700 dark:text-slate-300">Profile & Settings</Link>
         </div>
       )}
     </nav>

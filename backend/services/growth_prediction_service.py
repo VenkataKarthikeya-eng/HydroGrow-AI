@@ -18,17 +18,18 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, "..", ".."))
 
 def get_growth_model_path():
-    filename = "growth_model.keras"
-    candidates = [
-        os.path.join(PROJECT_ROOT, "backend", "ml_models", filename),
-        os.path.join(PROJECT_ROOT, "ml_models", filename),
-        os.path.join("backend", "ml_models", filename),
-        os.path.join("ml_models", filename),
-    ]
-    for c in candidates:
-        if os.path.exists(c):
-            return os.path.normpath(c)
-    return os.path.join(PROJECT_ROOT, "backend", "ml_models", filename)
+    for ext in ["growth_model.pth", "growth_model.keras"]:
+        candidates = [
+            os.path.join(PROJECT_ROOT, "backend", "ml_models", ext),
+            os.path.join(PROJECT_ROOT, "ml", "models", ext),
+            os.path.join(PROJECT_ROOT, "ml_models", ext),
+            os.path.join("backend", "ml_models", ext),
+            os.path.join("ml_models", ext),
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                return os.path.normpath(c)
+    return os.path.join(PROJECT_ROOT, "backend", "ml_models", "growth_model.pth")
 
 MODEL_PATH = get_growth_model_path()
 
@@ -63,48 +64,69 @@ class GrowthPredictionService:
         self._load_model()
 
     def _load_model(self):
-        if HAS_TORCH and os.path.exists(self.model_path):
+        if os.path.exists(self.model_path):
             try:
-                # Load PyTorch state dict or weights artifact
-                checkpoint = torch.load(self.model_path, map_location=self.device)
-                
-                # Re-instantiate architecture
-                weights = models.EfficientNet_B0_Weights.DEFAULT
-                backbone = models.efficientnet_b0(weights=None)
-                in_features = backbone.classifier[1].in_features
-                backbone.classifier = torch.nn.Identity()
+                import keras
+                self.model = keras.models.load_model(self.model_path, compile=False)
+                self.model_type = 'keras'
+                print(f"[GrowthPredictionService] Loaded growth model (Keras 3) from '{self.model_path}' successfully [OK].")
+                return
+            except Exception:
+                pass
 
-                class DualHeadEfficientNet(torch.nn.Module):
-                    def __init__(self, bb, inf):
-                        super().__init__()
-                        self.backbone = bb
-                        self.classifier = torch.nn.Sequential(
-                            torch.nn.Dropout(0.2),
-                            torch.nn.Linear(inf, 256),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(256, 3)
-                        )
-                        self.regressor = torch.nn.Sequential(
-                            torch.nn.Dropout(0.2),
-                            torch.nn.Linear(inf, 128),
-                            torch.nn.ReLU(),
-                            torch.nn.Linear(128, 1)
-                        )
-                    def forward(self, x):
-                        feat = self.backbone(x)
-                        return self.classifier(feat), self.regressor(feat).squeeze(-1)
+            try:
+                import tensorflow as tf
+                self.model = tf.keras.models.load_model(self.model_path, compile=False)
+                self.model_type = 'keras'
+                print(f"[GrowthPredictionService] Loaded growth model (TensorFlow) from '{self.model_path}' successfully [OK].")
+                return
+            except Exception:
+                pass
 
-                self.model = DualHeadEfficientNet(backbone, in_features).to(self.device)
-                if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-                    self.model.load_state_dict(checkpoint['model_state_dict'])
-                self.model.eval()
-                print(f"[GrowthPredictionService] Loaded model from '{self.model_path}' successfully.")
-            except Exception as e:
-                print(f"[GrowthPredictionService] Error loading model artifact: {e}")
-                self.model = None
+            if HAS_TORCH:
+                try:
+                    checkpoint = torch.load(self.model_path, map_location=self.device)
+                    backbone = models.efficientnet_b0(weights=None)
+                    in_features = backbone.classifier[1].in_features
+                    backbone.classifier = torch.nn.Identity()
+
+                    class DualHeadEfficientNet(torch.nn.Module):
+                        def __init__(self, bb, inf):
+                            super().__init__()
+                            self.backbone = bb
+                            self.classifier = torch.nn.Sequential(
+                                torch.nn.Dropout(0.2),
+                                torch.nn.Linear(inf, 256),
+                                torch.nn.ReLU(),
+                                torch.nn.Linear(256, 3)
+                            )
+                            self.regressor = torch.nn.Sequential(
+                                torch.nn.Dropout(0.2),
+                                torch.nn.Linear(inf, 128),
+                                torch.nn.ReLU(),
+                                torch.nn.Linear(128, 1)
+                            )
+                        def forward(self, x):
+                            feat = self.backbone(x)
+                            return self.classifier(feat), self.regressor(feat).squeeze(-1)
+
+                    self.model = DualHeadEfficientNet(backbone, in_features).to(self.device)
+                    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+                        self.model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+                    elif isinstance(checkpoint, dict):
+                        self.model.load_state_dict(checkpoint, strict=False)
+                    self.model.eval()
+                    self.model_type = 'torch'
+                    print(f"[GrowthPredictionService] Loaded growth model (PyTorch) from '{self.model_path}' successfully [OK].")
+                    return
+                except Exception as e:
+                    print(f"[GrowthPredictionService] Loading FAILED from '{self.model_path}': {e}. Fallback mode active.")
+                    self.model = None
+                    self.model_type = 'fallback'
         else:
-            print(f"[GrowthPredictionService] Model file not found at '{self.model_path}'. Using vision feature heuristics.")
+            print(f"[GrowthPredictionService] Model file not found at '{self.model_path}'. Fallback mode active.")
             self.model = None
+            self.model_type = 'fallback'
 
     def predict_image(self, image_bytes: bytes) -> dict:
         """
@@ -125,35 +147,60 @@ class GrowthPredictionService:
         except Exception as e:
             raise ValueError(f"Invalid image content: {str(e)}")
 
+        prediction_source = "ml_model"
         if self.model is not None:
             try:
-                tensor = self.transform(image).unsqueeze(0).to(self.device)
-                with torch.no_grad():
-                    logits, day_pred = self.model(tensor)
-                    probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
-                    pred_class_idx = int(np.argmax(probs))
-                    confidence = float(probs[pred_class_idx])
+                if getattr(self, 'model_type', '') == 'keras':
+                    img_resized = image.resize((224, 224))
+                    arr = np.array(img_resized, dtype=np.float32) / 255.0
+                    arr = np.expand_dims(arr, axis=0)
+                    preds = self.model(arr, training=False) if callable(self.model) else self.model.predict(arr)
+                    if isinstance(preds, (list, tuple)):
+                        logits = preds[0][0].numpy() if hasattr(preds[0][0], 'numpy') else np.array(preds[0][0])
+                        day_pred_raw = preds[1][0].numpy() if hasattr(preds[1][0], 'numpy') else preds[1][0]
+                        day_pred = float(np.squeeze(day_pred_raw))
+                    else:
+                        logits = preds[0].numpy() if hasattr(preds[0], 'numpy') else np.array(preds[0])
+                        day_pred = 15.0
+                    pred_class_idx = int(np.argmax(logits))
+                    confidence = float(np.max(logits))
+                    if confidence < 0 or confidence > 1:
+                        exp = np.exp(logits - np.max(logits))
+                        probs = exp / np.sum(exp)
+                        confidence = float(probs[pred_class_idx])
                     predicted_stage = STAGE_CLASSES[pred_class_idx]
-                    
-                    # Growth day prediction
-                    raw_day = float(day_pred.item())
                     min_d, max_d = STAGE_DAY_ESTIMATES.get(predicted_stage, (1, 27))
-                    growth_day = int(np.clip(round(raw_day), min_d, max_d))
+                    growth_day = int(np.clip(round(day_pred), min_d, max_d))
+                else:
+                    tensor = self.transform(image).unsqueeze(0).to(self.device)
+                    with torch.no_grad():
+                        logits, day_pred = self.model(tensor)
+                        probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+                        pred_class_idx = int(np.argmax(probs))
+                        confidence = float(probs[pred_class_idx])
+                        predicted_stage = STAGE_CLASSES[pred_class_idx]
+                        
+                        raw_day = float(day_pred.item())
+                        min_d, max_d = STAGE_DAY_ESTIMATES.get(predicted_stage, (1, 27))
+                        growth_day = int(np.clip(round(raw_day), min_d, max_d))
             except Exception as e:
                 print(f"[GrowthPredictionService] Inference error, falling back to feature heuristics: {e}")
                 predicted_stage, growth_day, confidence = self._heuristic_fallback(image)
+                prediction_source = "fallback"
         else:
             predicted_stage, growth_day, confidence = self._heuristic_fallback(image)
+            prediction_source = "fallback"
 
         recommendation = STAGE_RECOMMENDATIONS.get(predicted_stage, "Continue nutrient schedule.")
 
-        print(f"[Growth Debug] stage={predicted_stage}, day={growth_day}, confidence={confidence:.4f}")
+        print(f"[Growth Debug] stage={predicted_stage}, day={growth_day}, confidence={confidence:.4f}, source={prediction_source}")
 
         return {
             "growth_stage": predicted_stage,
             "growth_day": growth_day,
             "confidence": round(confidence, 2),
-            "recommendation": recommendation
+            "recommendation": recommendation,
+            "prediction_source": prediction_source
         }
 
     def _heuristic_fallback(self, image: Image.Image):

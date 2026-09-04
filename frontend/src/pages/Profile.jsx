@@ -6,14 +6,24 @@ import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 
 export default function Profile() {
-  const { user, setUser, theme, toggleTheme, predictionResult } = useContext(AppContext);
+  const { user, setUser, theme, toggleTheme, savedPredictions } = useContext(AppContext);
   const [downloading, setDownloading] = useState(false);
 
-  const mockHistory = [
-    { id: 1, date: 'July 18, 2026', crop: 'Butterhead Lettuce', yieldGrams: '382.7g', confidence: '91%', health: 'Excellent', status: 'Optimized' },
-    { id: 2, date: 'July 11, 2026', crop: 'Butterhead Lettuce', yieldGrams: '365.4g', confidence: '93%', health: 'Good', status: 'Optimized' },
-    { id: 3, date: 'July 04, 2026', crop: 'Butterhead Lettuce', yieldGrams: '340.0g', confidence: '89%', health: 'Excellent', status: 'Optimized' },
-  ];
+  const displayHistory = (savedPredictions && savedPredictions.length > 0)
+    ? savedPredictions.map((p, idx) => ({
+        id: p.id || `pred-${idx}`,
+        date: p.created_at ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Today',
+        crop: p.input_parameters?.crop_type || 'Butterhead Lettuce',
+        yieldGrams: `${Number(p.predicted_weight || 382.7).toFixed(1)}g`,
+        confidence: `${Math.round((p.confidence_score || 0.91) * (p.confidence_score <= 1 ? 100 : 1))}%`,
+        health: p.growth_category ? p.growth_category.replace(/[^a-zA-Z]/g, '').trim() || 'Good' : 'Optimal',
+        status: 'Optimized'
+      }))
+    : [
+        { id: 1, date: 'July 18, 2026', crop: 'Butterhead Lettuce', yieldGrams: '382.7g', confidence: '91%', health: 'Excellent', status: 'Optimized' },
+        { id: 2, date: 'July 11, 2026', crop: 'Butterhead Lettuce', yieldGrams: '365.4g', confidence: '93%', health: 'Good', status: 'Optimized' },
+        { id: 3, date: 'July 04, 2026', crop: 'Butterhead Lettuce', yieldGrams: '340.0g', confidence: '89%', health: 'Excellent', status: 'Optimized' },
+      ];
 
   const handleExportPDF = () => {
     setDownloading(true);
@@ -47,12 +57,12 @@ export default function Profile() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-black text-slate-900 dark:text-white">{user?.name || 'Karthikeya Cherukuri'}</h2>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white">{user?.name || 'Karthikeya'}</h2>
               <Badge variant="brand">Verified Grower</Badge>
-              <Badge variant="optimized" className="text-[10px]">Founder / Developer</Badge>
+              <Badge variant="optimized" className="text-[10px]">Lead Grower</Badge>
             </div>
             <p className="text-sm text-slate-500 mt-1">
-              Farm: <span className="font-bold text-slate-700 dark:text-slate-300">{user?.farmName || 'Demo Hydro Farm'}</span> • Role: <span className="font-bold text-emerald-600">{user?.role || 'Creator of HydroGrow AI'}</span>
+              Farm: <span className="font-bold text-slate-700 dark:text-slate-300">{user?.farmName || 'Demo Hydro Farm'}</span> • Role: <span className="font-bold text-emerald-600">{user?.role || 'Lead Grower'}</span>
             </p>
           </div>
         </div>
@@ -145,14 +155,14 @@ export default function Profile() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {mockHistory.map((item) => (
+              {displayHistory.map((item) => (
                 <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
                   <td className="py-3.5 font-medium text-slate-900 dark:text-slate-100">{item.date}</td>
                   <td className="py-3.5 font-bold text-emerald-600 dark:text-emerald-400">{item.crop}</td>
                   <td className="py-3.5 font-black text-slate-900 dark:text-white">{item.yieldGrams}</td>
                   <td className="py-3.5 text-slate-600 dark:text-slate-400">{item.confidence}</td>
                   <td className="py-3.5">
-                    <Badge variant={item.health === 'Excellent' ? 'optimized' : 'attention'}>
+                    <Badge variant={item.health === 'Excellent' || item.health === 'Optimal' ? 'optimized' : 'attention'}>
                       {item.health}
                     </Badge>
                   </td>

@@ -33,17 +33,18 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.normpath(os.path.join(BASE_DIR, "..", ".."))
 
 def get_nutrient_model_path():
-    filename = "nutrient_model.keras"
-    candidates = [
-        os.path.join(PROJECT_ROOT, "backend", "ml_models", filename),
-        os.path.join(PROJECT_ROOT, "ml_models", filename),
-        os.path.join("backend", "ml_models", filename),
-        os.path.join("ml_models", filename),
-    ]
-    for c in candidates:
-        if os.path.exists(c):
-            return os.path.normpath(c)
-    return os.path.join(PROJECT_ROOT, "backend", "ml_models", filename)
+    for ext in ["nutrient_model.pth", "nutrient_model.keras"]:
+        candidates = [
+            os.path.join(PROJECT_ROOT, "backend", "ml_models", ext),
+            os.path.join(PROJECT_ROOT, "ml", "models", ext),
+            os.path.join(PROJECT_ROOT, "ml_models", ext),
+            os.path.join("backend", "ml_models", ext),
+            os.path.join("ml_models", ext),
+        ]
+        for c in candidates:
+            if os.path.exists(c):
+                return os.path.normpath(c)
+    return os.path.join(PROJECT_ROOT, "backend", "ml_models", "nutrient_model.pth")
 
 MODEL_PATH = get_nutrient_model_path()
 
@@ -79,24 +80,47 @@ class NutrientPredictionService:
         self._load_model()
 
     def _load_model(self):
-        if HAS_TORCH and os.path.exists(self.model_path):
+        if os.path.exists(self.model_path):
             try:
-                checkpoint = torch.load(self.model_path, map_location=self.device)
-                self.model = MobileNetV3NutrientModel(num_classes=4).to(self.device)
-                
-                if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-                    self.model.load_state_dict(checkpoint['model_state_dict'])
-                elif isinstance(checkpoint, dict):
-                    self.model.load_state_dict(checkpoint)
+                import keras
+                self.model = keras.models.load_model(self.model_path, compile=False)
+                self.model_type = 'keras'
+                print(f"[NutrientPredictionService] Loaded nutrient model (Keras 3) from '{self.model_path}' successfully [OK].")
+                return
+            except Exception:
+                pass
+
+            try:
+                import tensorflow as tf
+                self.model = tf.keras.models.load_model(self.model_path, compile=False)
+                self.model_type = 'keras'
+                print(f"[NutrientPredictionService] Loaded nutrient model (TensorFlow) from '{self.model_path}' successfully [OK].")
+                return
+            except Exception:
+                pass
+
+            if HAS_TORCH:
+                try:
+                    checkpoint = torch.load(self.model_path, map_location=self.device)
+                    self.model = MobileNetV3NutrientModel(num_classes=4).to(self.device)
                     
-                self.model.eval()
-                print("[NutrientPredictionService] Loaded nutrient model successfully.")
-            except Exception as e:
-                print(f"[NutrientPredictionService] Error loading nutrient model: {e}")
-                self.model = None
+                    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+                        self.model.load_state_dict(checkpoint['model_state_dict'])
+                    elif isinstance(checkpoint, dict):
+                        self.model.load_state_dict(checkpoint)
+                        
+                    self.model.eval()
+                    self.model_type = 'torch'
+                    print(f"[NutrientPredictionService] Loaded nutrient model (PyTorch) from '{self.model_path}' successfully [OK].")
+                    return
+                except Exception as e:
+                    print(f"[NutrientPredictionService] Loading FAILED from '{self.model_path}': {e}. Fallback mode active.")
+                    self.model = None
+                    self.model_type = 'fallback'
         else:
-            print(f"[NutrientPredictionService] Model file not found at '{self.model_path}'.")
+            print(f"[NutrientPredictionService] Model file not found at '{self.model_path}'. Fallback mode active.")
             self.model = None
+            self.model_type = 'fallback'
 
     def predict_image(self, image_bytes: bytes) -> dict:
         """
@@ -116,37 +140,56 @@ class NutrientPredictionService:
         except Exception as e:
             raise ValueError(f"Invalid image content: {str(e)}")
 
+        prediction_source = "ml_model"
         if self.model is not None:
             try:
-                tensor = self.transform(image).unsqueeze(0).to(self.device)
-                with torch.no_grad():
-                    logits = self.model(tensor)
-                    probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+                if getattr(self, 'model_type', '') == 'keras':
+                    img_resized = image.resize((224, 224))
+                    arr = np.array(img_resized, dtype=np.float32) / 255.0
+                    arr = np.expand_dims(arr, axis=0)
+                    preds = self.model(arr, training=False) if callable(self.model) else self.model.predict(arr)
+                    probs = preds[0].numpy() if hasattr(preds[0], 'numpy') else np.array(preds[0])
                     pred_idx = int(np.argmax(probs))
                     confidence = float(probs[pred_idx])
+                    if confidence < 0 or confidence > 1:
+                        exp = np.exp(probs - np.max(probs))
+                        p = exp / np.sum(exp)
+                        confidence = float(p[pred_idx])
                     raw_class = CLASS_NAMES[pred_idx]
+                else:
+                    tensor = self.transform(image).unsqueeze(0).to(self.device)
+                    with torch.no_grad():
+                        logits = self.model(tensor)
+                        probs = torch.softmax(logits, dim=1).squeeze(0).cpu().numpy()
+                        pred_idx = int(np.argmax(probs))
+                        confidence = float(probs[pred_idx])
+                        raw_class = CLASS_NAMES[pred_idx]
             except Exception as e:
                 print(f"[NutrientPredictionService] Inference error, falling back to color heuristics: {e}")
                 raw_class, confidence = self._heuristic_fallback(image)
+                prediction_source = "fallback"
         else:
             raw_class, confidence = self._heuristic_fallback(image)
+            prediction_source = "fallback"
 
         display_condition = CONDITION_DISPLAY_NAMES.get(raw_class, raw_class)
         recommendation = RECOMMENDATIONS.get(raw_class, "Maintain current nutrient schedule.")
 
-        print(f"[Nutrient Debug] condition={display_condition}, confidence={confidence:.4f}")
+        print(f"[Nutrient Debug] condition={display_condition}, confidence={confidence:.4f}, source={prediction_source}")
 
         if confidence < 0.50:
             return {
                 "condition": "Uncertain",
                 "confidence": round(confidence, 2),
-                "recommendation": "Low confidence. Please upload a clearer leaf image."
+                "recommendation": "Low confidence. Please upload a clearer leaf image.",
+                "prediction_source": prediction_source
             }
 
         return {
             "condition": display_condition,
             "confidence": round(confidence, 2),
-            "recommendation": recommendation
+            "recommendation": recommendation,
+            "prediction_source": prediction_source
         }
 
     def _heuristic_fallback(self, image: Image.Image):

@@ -31,35 +31,43 @@ class TestDatabaseLayer(unittest.TestCase):
         self.assertIsInstance(self.db, Session)
 
     def test_user_creation_and_retrieval(self):
+        import uuid
+        uid = str(uuid.uuid4())[:8]
+        username = f"testuser_{uid}"
+        email = f"testuser_{uid}@example.com"
         user_schema = schemas.UserCreate(
-            username="testuser",
-            email="testuser@example.com",
+            username=username,
+            email=email,
             password="testpassword"
         )
         # Create user
         db_user = crud.create_user(self.db, user=user_schema, password_hash="hashed_password_val")
         self.assertIsNotNone(db_user.id)
-        self.assertEqual(db_user.username, "testuser")
-        self.assertEqual(db_user.email, "testuser@example.com")
+        self.assertEqual(db_user.username, username)
+        self.assertEqual(db_user.email, email)
         self.assertEqual(db_user.password_hash, "hashed_password_val")
 
         # Retrieve user
         retrieved_user = crud.get_user(self.db, user_id=db_user.id)
-        self.assertEqual(retrieved_user.username, "testuser")
+        self.assertEqual(retrieved_user.username, username)
 
         # Retrieve by username
-        retrieved_by_uname = crud.get_user_by_username(self.db, username="testuser")
+        retrieved_by_uname = crud.get_user_by_username(self.db, username=username)
         self.assertEqual(retrieved_by_uname.id, db_user.id)
 
         # Retrieve by email
-        retrieved_by_email = crud.get_user_by_email(self.db, email="testuser@example.com")
+        retrieved_by_email = crud.get_user_by_email(self.db, email=email)
         self.assertEqual(retrieved_by_email.id, db_user.id)
 
     def test_prediction_creation_and_history(self):
+        import uuid
+        uid = str(uuid.uuid4())[:8]
+        username = f"preduser_{uid}"
+        email = f"preduser_{uid}@example.com"
         # Create user first for foreign key link
         user_schema = schemas.UserCreate(
-            username="preduser",
-            email="preduser@example.com",
+            username=username,
+            email=email,
             password="testpassword"
         )
         db_user = crud.create_user(self.db, user=user_schema, password_hash="hashed_pwd")

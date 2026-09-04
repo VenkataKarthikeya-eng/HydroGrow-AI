@@ -1,4 +1,5 @@
 import os
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
@@ -151,6 +152,10 @@ async def analyze_image(
         "triggered_automation": len(triggered_events) > 0
     }
 
+@router.get("/scans", summary="Fetch previous plant health scans (alias)")
+def get_scans(db: Session = Depends(get_db), user: Any = Depends(get_current_user_required)):
+    return get_history(db=db, user=user)
+
 @router.get("/history", summary="Fetch previous plant health scans")
 def get_history(db: Session = Depends(get_db), user: Any = Depends(get_current_user_required)):
     # Join with PlantImage to respect user isolation
@@ -276,11 +281,13 @@ async def predict_nutrient_condition(
 
 @router.post("/plant-analysis", summary="Combined Growth & Nutrient Plant Analysis Scanner")
 async def analyze_plant_combined(
-    file: UploadFile = File(...)
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    user: Optional[Any] = Depends(get_optional_current_user)
 ):
     """
-    Combines Model 1 (Growth Stage & Growth Day) and Model 2 (Nutrient Deficiency Detection)
-    into a unified diagnostic response with overarching cultivation recommendations.
+    Combines Crop Validation, Growth Prediction, and Nutrient Deficiency Detection
+    into a unified diagnostic response with persistence and consistent response schema.
     """
     print(f"[Plant Doctor] Image received: {file.filename or 'unnamed_image'}", flush=True)
     if not file.filename:
@@ -293,6 +300,8 @@ async def analyze_plant_combined(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to read upload payload: {str(e)}")
 
+    now_iso = datetime.now(timezone.utc).isoformat()
+
     print("[Plant Doctor] Crop validation started", flush=True)
     val_check = crop_validation_service.validate_crop_image(contents)
     print(f"[Plant Doctor] Crop validation completed: {val_check.get('status')} ({val_check.get('class')}, confidence: {val_check.get('confidence')})", flush=True)
@@ -300,7 +309,18 @@ async def analyze_plant_combined(
     if val_check.get("status") == "rejected":
         return JSONResponse(
             status_code=400,
-            content=val_check
+            content={
+                "status": "rejected",
+                "reason": val_check.get("reason", "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image."),
+                "crop_validation": {
+                    "status": "rejected",
+                    "class": val_check.get("class", "non_leaf"),
+                    "confidence": val_check.get("confidence", 0.96)
+                },
+                "prediction_source": val_check.get("prediction_source", "ml_model"),
+                "confidence": val_check.get("confidence", 0.96),
+                "timestamp": now_iso
+            }
         )
 
     try:
@@ -312,7 +332,8 @@ async def analyze_plant_combined(
             "growth_stage": "Vegetative",
             "growth_day": 15,
             "confidence": 0.85,
-            "recommendation": "Maintain optimal hydroponic nutrients."
+            "recommendation": "Maintain optimal hydroponic nutrients.",
+            "prediction_source": "fallback"
         }
 
     try:
@@ -323,7 +344,8 @@ async def analyze_plant_combined(
         nutrient_res = {
             "condition": "Healthy",
             "confidence": 0.85,
-            "recommendation": "Maintain balanced nutrient dosing."
+            "recommendation": "Maintain balanced nutrient dosing.",
+            "prediction_source": "fallback"
         }
 
     # Combined recommendation logic
@@ -332,8 +354,16 @@ async def analyze_plant_combined(
     else:
         overall_rec = f"Action required: Detected {nutrient_res.get('condition')} at Day {growth_res.get('growth_day')}. {nutrient_res.get('recommendation')}"
 
+    pred_source = growth_res.get("prediction_source") or nutrient_res.get("prediction_source") or "ml_model"
+    overall_conf = round(float(growth_res.get("confidence", 0.95)), 2)
+
     response_data = {
         "status": "success",
+        "crop_validation": {
+            "status": val_check.get("status", "allowed"),
+            "class": val_check.get("class", "lettuce_leaf"),
+            "confidence": val_check.get("confidence", 0.95)
+        },
         "growth_prediction": {
             "stage": growth_res.get("growth_stage"),
             "growth_day": growth_res.get("growth_day"),
@@ -343,12 +373,57 @@ async def analyze_plant_combined(
             "condition": nutrient_res.get("condition"),
             "confidence": nutrient_res.get("confidence")
         },
-        "recommendation": overall_rec
+        "recommendation": overall_rec,
+        "prediction_source": pred_source,
+        "confidence": overall_conf,
+        "timestamp": now_iso
     }
+
+    # Persist scan to database if user is authenticated
+    if user is not None and hasattr(user, 'id'):
+        try:
+            save_path = ImageProcessor.save_image(file)
+            plant_img = PlantImage(
+                user_id=user.id,
+                image_path=save_path,
+                crop_type="lettuce",
+                growth_stage=growth_res.get("growth_stage", "Vegetative")
+            )
+            db.add(plant_img)
+            db.commit()
+            db.refresh(plant_img)
+
+            analysis = PlantAnalysis(
+                image_id=plant_img.id,
+                disease_name=nutrient_res.get("condition", "Healthy"),
+                confidence_score=overall_conf,
+                severity="None" if nutrient_res.get("condition") in ["Healthy", "Uncertain"] else "Medium",
+                health_score=95.0 if nutrient_res.get("condition") == "Healthy" else 65.0,
+                nutrient_status={
+                    "condition": nutrient_res.get("condition"),
+                    "growth_stage": growth_res.get("growth_stage"),
+                    "growth_day": growth_res.get("growth_day"),
+                    "prediction_source": pred_source
+                },
+                recommendations=[overall_rec]
+            )
+            db.add(analysis)
+
+            obs = GrowthObservation(
+                user_id=user.id,
+                image_id=plant_img.id,
+                growth_stage=growth_res.get("growth_stage", "Vegetative"),
+                height_estimate=float(growth_res.get("growth_day", 15)),
+                leaf_area_estimate=50.0,
+                growth_score=85.0
+            )
+            db.add(obs)
+            db.commit()
+            print(f"[Plant Doctor] Scan persisted to DB for user_id={user.id}, image_id={plant_img.id}", flush=True)
+        except Exception as e:
+            db.rollback()
+            print(f"[Plant Doctor Warning] Could not persist scan to DB: {e}", flush=True)
 
     print("[Plant Doctor] Final response generated", flush=True)
     return response_data
-
-
-
 

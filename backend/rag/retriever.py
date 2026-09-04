@@ -9,6 +9,7 @@ import sys
 import os
 import math
 import time
+from typing import Optional, List, Dict
 
 # Ensure directory is in Python path for local imports
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

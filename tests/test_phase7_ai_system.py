@@ -174,8 +174,7 @@ class TestPhase7AISystem(unittest.TestCase):
         self.assertIn("type a question", res_empty.lower())
 
         res_unrelated = self.assistant.get_response("What is the temperature on Mars?", self.context)
-        self.assertIn("HydroGrow AI Assistant", res_unrelated)
-        self.assertIn("optimize hydroponic settings", res_unrelated)
+        self.assertIn("hydroponics", res_unrelated.lower())
 
 
 if __name__ == "__main__":

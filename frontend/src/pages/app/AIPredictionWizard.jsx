@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sprout, Sparkles, CheckCircle2, AlertTriangle, ArrowRight, 
-  RotateCcw, Save, Bot, Thermometer, Droplets, Wind, Sliders
+  RotateCcw, Save, Thermometer, Droplets, Wind, Sliders, History
 } from 'lucide-react';
 import { AppContext } from '../../context/AppContext';
 import Card from '../../components/ui/Card';
@@ -18,6 +18,7 @@ export default function AIPredictionWizard() {
     predictionError,
     runPrediction,
     resetPrediction,
+    saveCurrentPrediction,
   } = useContext(AppContext);
 
   const navigate = useNavigate();
@@ -26,13 +27,14 @@ export default function AIPredictionWizard() {
   const [formData, setFormData] = useState(predictionInputs);
   const [analysisStepIndex, setAnalysisStepIndex] = useState(0);
   const [localError, setLocalError] = useState(null);
+  const [isSaved, setIsSaved] = useState(false);
 
   const analysisSteps = [
-    'Initializing machine learning model weights...',
-    'Analyzing climate & fertigation parameters...',
-    'Comparing 216 historical hydroponic growth cycles...',
-    'Evaluating nutrient response curve & leaf transpiration...',
-    'Generating harvest yield prediction & triage recommendations...',
+    'Loading trained yield model...',
+    'Processing environment parameters...',
+    'Evaluating water quality & pH metrics...',
+    'Calculating expected fresh weight yield...',
+    'Finalizing yield prediction report...'
   ];
 
   const handleInputChange = (e) => {
@@ -81,6 +83,7 @@ export default function AIPredictionWizard() {
       console.log('Sending Yield Prediction API Payload:', fullPayload);
 
       await runPrediction(fullPayload);
+      setIsSaved(false);
       setStep(3);
     } catch (err) {
       console.error('Yield Prediction API Error:', err);
@@ -94,7 +97,17 @@ export default function AIPredictionWizard() {
   const handleReset = () => {
     resetPrediction();
     setLocalError(null);
+    setIsSaved(false);
     setStep(1);
+  };
+
+  const handleSavePrediction = async () => {
+    try {
+      await saveCurrentPrediction();
+      setIsSaved(true);
+    } catch (err) {
+      console.error('Failed to save prediction:', err);
+    }
   };
 
   const rawWeight = predictionResult?.predicted_yield_grams ?? predictionResult?.prediction?.predicted_weight;
@@ -111,13 +124,13 @@ export default function AIPredictionWizard() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-            <Sparkles className="w-4 h-4" /> AI Yield Intelligence
+            <Sparkles className="w-4 h-4" /> Harvest Predictor
           </div>
           <h1 className="text-3xl font-black text-slate-900 dark:text-white mt-1">
-            AI Crop Yield Wizard
+            Yield Predictor
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Configure climate, water, and seedling metrics to generate precision yield predictions.
+            Enter your hydroponic environmental parameters to predict final lettuce harvest weight.
           </p>
         </div>
 
@@ -342,46 +355,102 @@ export default function AIPredictionWizard() {
                 <div className="text-xs text-emerald-200 uppercase font-bold">Model Confidence</div>
                 <div className="text-3xl font-black text-white">{confidence}</div>
               </div>
-              <div className="flex gap-2">
-                <Button variant="secondary" size="sm" onClick={handleReset} icon={RotateCcw} className="bg-white text-slate-900 hover:bg-emerald-50">
+              <div className="flex flex-wrap gap-2 items-center">
+                <Button variant="secondary" size="sm" onClick={handleReset} icon={RotateCcw} className="bg-white text-slate-900 hover:bg-emerald-50 shadow-sm">
                   New Run
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigate('/assistant')} icon={Bot} className="border-white/30 text-white hover:bg-white/10">
-                  Ask AI Advisor
+                <Button
+                  variant={isSaved ? "secondary" : "outline"}
+                  size="sm"
+                  onClick={handleSavePrediction}
+                  icon={isSaved ? CheckCircle2 : Save}
+                  className={isSaved
+                    ? "bg-emerald-100 text-emerald-950 border-emerald-300 font-bold hover:bg-emerald-200 shadow-sm"
+                    : "border-white/40 text-white hover:bg-white/10 font-bold"}
+                >
+                  {isSaved ? "Saved to Scan History ✓" : "Save Result"}
                 </Button>
               </div>
             </div>
           </div>
+
+          {/* Saved to Scan History Quick-Access Banner */}
+          {isSaved && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-emerald-600 text-white shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-black text-emerald-900 dark:text-emerald-200">
+                    Yield Forecast Saved to Scan History!
+                  </h4>
+                  <p className="text-xs text-emerald-700 dark:text-emerald-300 font-medium">
+                    This yield forecast ({yieldResult}, {confidence} confidence) has been saved to your records.
+                  </p>
+                </div>
+              </div>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => navigate('/history/predictions')}
+                icon={History}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold shrink-0 w-full sm:w-auto"
+              >
+                View in Scan History
+              </Button>
+            </div>
+          )}
 
           {/* Key Factor Analysis */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card padding="p-6" header="Temperature Factor">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Status</span>
-                <Badge variant="optimized">Optimal (22.0°C)</Badge>
+                <Badge variant={formData.air_temperature >= 20.0 && formData.air_temperature <= 25.0 ? 'optimized' : 'attention'}>
+                  {formData.air_temperature >= 20.0 && formData.air_temperature <= 25.0 ? `Optimal (${formData.air_temperature}°C)` : `Attention (${formData.air_temperature}°C)`}
+                </Badge>
               </div>
-              <p className="text-xs text-slate-500 mt-3">Ideal enzymatic activity for leaf expansion.</p>
+              <p className="text-xs text-slate-500 mt-3">
+                {formData.air_temperature >= 20.0 && formData.air_temperature <= 25.0
+                  ? 'Ideal enzymatic activity for leaf expansion.'
+                  : 'Temperature is outside optimal growth range (20°C - 24°C).'}
+              </p>
             </Card>
 
             <Card padding="p-6" header="Water pH Factor">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Status</span>
-                <Badge variant="optimized">Optimal (6.2)</Badge>
+                <Badge variant={formData.water_ph >= 5.8 && formData.water_ph <= 6.5 ? 'optimized' : 'attention'}>
+                  {formData.water_ph >= 5.8 && formData.water_ph <= 6.5 ? `Optimal (${formData.water_ph})` : `Adjust (${formData.water_ph})`}
+                </Badge>
               </div>
-              <p className="text-xs text-slate-500 mt-3">Maximum macro-nutrient solubility achieved.</p>
+              <p className="text-xs text-slate-500 mt-3">
+                {formData.water_ph >= 5.8 && formData.water_ph <= 6.5
+                  ? 'Maximum macro-nutrient solubility achieved.'
+                  : 'pH deviation reduces nutrient uptake efficiency (target: 5.8 - 6.5).'}
+              </p>
             </Card>
 
             <Card padding="p-6" header="Nutrient Density (EC)">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Status</span>
-                <Badge variant="attention">Attention (+0.2)</Badge>
+                <Badge variant={formData.water_ec >= 1.8 && formData.water_ec <= 2.4 ? 'optimized' : 'attention'}>
+                  {formData.water_ec >= 1.8 && formData.water_ec <= 2.4 ? `Optimal (${formData.water_ec} mS/cm)` : `Attention (${formData.water_ec} mS/cm)`}
+                </Badge>
               </div>
-              <p className="text-xs text-slate-500 mt-3">Increase EC slightly to 2.2 mS/cm for peak mass.</p>
+              <p className="text-xs text-slate-500 mt-3">
+                {formData.water_ec >= 1.8 && formData.water_ec <= 2.4
+                  ? 'Nutrient ion density matches vegetative requirements.'
+                  : formData.water_ec < 1.8
+                  ? `EC is low. Increase nutrient concentration toward 2.0 - 2.2 mS/cm.`
+                  : `EC is high. Dilute reservoir with fresh RO water to prevent salt burn.`}
+              </p>
             </Card>
           </div>
 
           {/* Medical-Report Triage Recommendations */}
-          <Card padding="p-8" header="AI Recommendations (Medical Triage Standard)">
+          <Card padding="p-8" header="AI Recommendations (Cultivation Triage Standard)">
             <div className="space-y-4">
               
               {/* Critical Tier */}
@@ -391,7 +460,9 @@ export default function AIPredictionWizard() {
                   Critical Priority (Immediate Action)
                 </div>
                 <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  🔴 None — No immediate emergency alerts detected.
+                  {formData.water_ph < 5.2 || formData.water_ph > 7.5 || formData.air_temperature > 32.0
+                    ? `🔴 Emergency Alert: Immediate fertigation correction needed for pH (${formData.water_ph}) or Air Temp (${formData.air_temperature}°C).`
+                    : '🟢 None — No immediate critical emergency alerts detected.'}
                 </p>
               </div>
 
@@ -402,7 +473,11 @@ export default function AIPredictionWizard() {
                   Attention Required
                 </div>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  🟡 Increase Electrical Conductivity (EC) slightly from 2.0 to 2.2 mS/cm to prevent tip-burn during vegetative flush.
+                  {formData.water_ec < 1.8 || formData.water_ec > 2.4
+                    ? `🟡 Adjust Electrical Conductivity (EC) from ${formData.water_ec} to 2.0 - 2.2 mS/cm for optimal biomass accumulation.`
+                    : formData.air_temperature < 20.0 || formData.air_temperature > 25.0
+                    ? `🟡 Regulate air temperature from ${formData.air_temperature}°C toward target 22.0°C.`
+                    : '🟡 Routine inspection recommended: verify automated dosing sensor calibration.'}
                 </p>
               </div>
 
@@ -413,7 +488,7 @@ export default function AIPredictionWizard() {
                   Optimized Parameters
                 </div>
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
-                  🟢 Maintain current water pH level (6.0 - 6.4) and root zone temperature (22.5°C).
+                  🟢 Hydroponic reservoir conditions stabilized: Seedling vigor ({formData.seedling_height || 12.0}cm, {formData.seedling_weight || 4.0}g) supported.
                 </p>
               </div>
 

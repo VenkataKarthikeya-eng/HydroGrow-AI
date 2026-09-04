@@ -212,31 +212,31 @@ export default function SimulationLab() {
         </div>
       </div>
 
-      {/* Top Section: Digital Twin Status & Stage Timeline Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+      {/* Row 1: High-Level Telemetry & Projected Yield Performance Banner */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* Section 1: Digital Twin Status Card (5 cols) */}
+        {/* Digital Twin Status Card (5 cols) */}
         <div className="lg:col-span-5">
-          <Card padding="p-6 sm:p-8" header="Digital Twin Status" subtitle="Real-time crop lifecycle & model telemetry">
-            <div className="space-y-5">
+          <Card padding="p-6 sm:p-7" header="Digital Twin Status" subtitle="Real-time crop lifecycle & model telemetry">
+            <div className="space-y-4">
               
               {/* Crop & Confidence Row */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                     <Sprout className="w-3.5 h-3.5 text-emerald-500" /> Crop Specie
                   </div>
-                  <div className="text-lg font-black text-slate-900 dark:text-white mt-1">
+                  <div className="text-base font-black text-slate-900 dark:text-white mt-1">
                     Lettuce
                   </div>
                   <div className="text-[11px] font-medium text-slate-500">Butterhead Hydroponic</div>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800" title="Physics-informed ML model confidence based on sensor calibration log">
+                <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800" title="Physics-informed ML model confidence based on sensor calibration log">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Confidence
                   </div>
-                  <div className="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1">
+                  <div className="text-base font-black text-emerald-600 dark:text-emerald-400 mt-1">
                     90%
                   </div>
                   <div className="text-[11px] font-medium text-slate-500">Physics + ML Model</div>
@@ -244,7 +244,7 @@ export default function SimulationLab() {
               </div>
 
               {/* Growth Cycle & Current Stage */}
-              <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 space-y-3">
+              <div className="p-3.5 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/50 space-y-2.5">
                 <div className="flex justify-between items-center">
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                     <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> Growth Cycle Progress
@@ -266,7 +266,7 @@ export default function SimulationLab() {
 
                 <div className="flex justify-between items-center pt-1 border-t border-emerald-100 dark:border-emerald-900/40">
                   <span className="text-xs text-slate-500 font-medium">Current Stage:</span>
-                  <Badge variant="brand" className="px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                  <Badge variant="brand" className="px-3 py-0.5 text-xs font-bold uppercase tracking-wider">
                     {currentStage.name} ({currentStage.range})
                   </Badge>
                 </div>
@@ -276,64 +276,56 @@ export default function SimulationLab() {
           </Card>
         </div>
 
-        {/* Section 2: Growth Stage Timeline (7 cols) */}
+        {/* Projected Yield Banner Card (7 cols) */}
         <div className="lg:col-span-7">
-          <Card padding="p-6 sm:p-8" header="Growth Stage Timeline" subtitle="Phenological stage mapping across 30 days">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 items-stretch h-full">
-              {stages.map((stage) => {
-                const isActive = currentStage.id === stage.id;
-                return (
-                  <button
-                    key={stage.id}
-                    onClick={() => setCurrentDay(stage.start === 1 ? 4 : stage.start === 8 ? 14 : stage.start === 21 ? 24 : 29)}
-                    className={`p-4 rounded-2xl text-left border transition-all flex flex-col justify-between cursor-pointer ${
-                      isActive
-                        ? 'border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10 ring-2 ring-emerald-500/30 scale-102'
-                        : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700'
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={`text-[10px] font-black uppercase tracking-wider ${
-                          isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'
-                        }`}>
-                          Stage {stage.id === 'seedling' ? '1' : stage.id === 'vegetative' ? '2' : stage.id === 'maturity' ? '3' : '4'}
-                        </span>
-                        {isActive && (
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        )}
-                      </div>
-                      <div className="font-extrabold text-sm text-slate-900 dark:text-white">
-                        {stage.name}
-                      </div>
-                      <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
-                        {stage.range}
-                      </div>
-                    </div>
-
-                    <div className="mt-4 pt-2 border-t border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-[10px]">
-                      <span className={isActive ? 'font-bold text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}>
-                        {isActive ? 'Active Stage' : 'Select Stage'}
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+          <div className="h-full p-6 sm:p-7 bg-gradient-to-br from-emerald-600 via-teal-700 to-slate-900 text-white rounded-2xl shadow-xl flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute right-0 top-0 w-64 h-64 bg-white/5 rounded-full blur-3xl pointer-events-none" />
+            
+            <div>
+              <div className="text-xs uppercase font-bold text-emerald-100 tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-amber-300" /> Projected Yield Performance
+              </div>
+              <div className="text-4xl sm:text-5xl font-black mt-2 tracking-tight">
+                {yieldGainPercent >= 0 ? `+${yieldGainPercent}%` : `${yieldGainPercent}%`}{' '}
+                <span className="text-lg sm:text-xl font-semibold text-emerald-200">
+                  {yieldGainPercent >= 0 ? 'Yield Increase' : 'Yield Decrease'}
+                </span>
+              </div>
+              <p className="text-xs text-emerald-100/90 mt-2 max-w-xl leading-relaxed">
+                Simulated fresh harvest weight is estimated at <strong className="text-white font-bold">{yieldData.expectedWeight}g</strong> compared to baseline optimal cycles (<strong className="text-white font-bold">{yieldData.baselineWeight}g</strong>).
+              </p>
             </div>
-          </Card>
+
+            <div className="grid grid-cols-3 gap-3 pt-4 mt-4 border-t border-white/15 text-center">
+              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
+                <div className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Harvest Weight</div>
+                <div className="text-base font-black text-white mt-0.5">{yieldData.expectedWeight}g</div>
+              </div>
+              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
+                <div className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Harvest Day</div>
+                <div className="text-base font-black text-white mt-0.5">Day {harvestDay}</div>
+              </div>
+              <div className="p-2.5 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
+                <div className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Health Index</div>
+                <div className={`text-base font-black mt-0.5 ${healthScore >= 90 ? 'text-emerald-300' : healthScore >= 75 ? 'text-amber-300' : 'text-rose-300'}`}>
+                  {healthScore}%
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
 
-      {/* Main 2-Column Grid Layout */}
+      {/* Row 2: Core Interactive Simulation Grid (Left: Parameters & Factors | Right: 30-Day Curve & AI Comparison) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         
-        {/* Left Column: Simulator Sliders + Environmental Factor Analysis (4 cols) */}
-        <div className="lg:col-span-4 space-y-6">
+        {/* LEFT COLUMN: Simulation Parameters + Growth Factors (5 cols) */}
+        <div className="lg:col-span-5 space-y-6">
           
           {/* Controls Card */}
-          <Card padding="p-6 sm:p-8" header="Simulation Parameters" subtitle="Adjust virtual greenhouse variables">
-            <div className="space-y-6">
+          <Card padding="p-6 sm:p-7" header="Simulation Parameters" subtitle="Adjust virtual greenhouse variables">
+            <div className="space-y-5">
               
               {/* Temperature Slider */}
               <div>
@@ -457,8 +449,8 @@ export default function SimulationLab() {
             </div>
           </Card>
 
-          {/* Section 3: Environmental Factor Analysis (Growth Factors Card) */}
-          <Card padding="p-6 sm:p-8" header="Growth Factors" subtitle="Simulation engine calculated physiological indices">
+          {/* Growth Factors & Physiological Indices Card */}
+          <Card padding="p-6 sm:p-7" header="Growth Factors" subtitle="Simulation engine calculated physiological indices">
             <div className="space-y-4">
               
               {/* Temperature Factor */}
@@ -546,124 +538,11 @@ export default function SimulationLab() {
 
         </div>
 
-        {/* Right Column: High-Impact Output + Growth Chart + AI Insights (8 cols) */}
-        <div className="lg:col-span-8 space-y-6">
+        {/* RIGHT COLUMN: 30-Day Growth Curve + AI Optimization Comparison (7 cols) */}
+        <div className="lg:col-span-7 space-y-6">
           
-          {/* Yield Gain Header Card */}
-          <div className="saas-card p-6 sm:p-8 bg-gradient-to-r from-emerald-600 via-teal-600 to-slate-900 text-white rounded-2xl shadow-xl flex items-center justify-between gap-6">
-            <div>
-              <div className="text-xs uppercase font-bold text-emerald-100 tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-amber-300" /> Projected Yield Improvement
-              </div>
-              <div className="text-4xl sm:text-5xl font-black mt-1 tracking-tight">
-                {yieldGainPercent >= 0 ? `+${yieldGainPercent}%` : `${yieldGainPercent}%`}{' '}
-                <span className="text-xl font-semibold text-emerald-200">
-                  {yieldGainPercent >= 0 ? 'Yield Increase' : 'Yield Decrease'}
-                </span>
-              </div>
-              <p className="text-xs text-emerald-100 mt-1">
-                Estimated harvest weight ({yieldData.expectedWeight}g) compared to baseline hydroponic cycles ({yieldData.baselineWeight}g).
-              </p>
-            </div>
-            
-            <div className="hidden sm:flex p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 items-center justify-center shrink-0">
-              <Zap className="w-10 h-10 text-amber-300" />
-            </div>
-          </div>
-
-          {/* AI Optimization Comparison Section */}
-          <Card padding="p-6 sm:p-8" header="AI Optimization Comparison" subtitle="Before Optimization vs AI Optimized Environmental Trajectory">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-              
-              {/* Current Environment (Before Optimization) */}
-              <div className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-slate-200 dark:border-slate-800">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Current Simulation</span>
-                    <h4 className="text-base font-extrabold text-slate-900 dark:text-white">Current Environment</h4>
-                  </div>
-                  <Badge variant="outline" className="px-2.5 py-1 text-xs font-bold text-slate-600 dark:text-slate-400">
-                    Before Optimization
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Harvest Weight</div>
-                    <div className="text-lg font-black text-slate-900 dark:text-white mt-1">
-                      {simResult.yield.expectedWeight}g
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Harvest Day</div>
-                    <div className="text-lg font-black text-slate-900 dark:text-white mt-1">
-                      Day {simResult.harvestDay}
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Health Score</div>
-                    <div className="text-lg font-black text-amber-500 mt-1">
-                      {simResult.healthScore}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* AI Optimized */}
-              <div className="p-5 rounded-2xl bg-slate-900 border border-emerald-500/30 shadow-lg space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-emerald-900/40">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-amber-300" /> Recommendation
-                    </span>
-                    <h4 className="text-base font-extrabold text-white">AI Optimized</h4>
-                  </div>
-                  <Badge variant="brand" className="px-2.5 py-1 text-xs font-bold uppercase tracking-wider">
-                    Peak Performance
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
-                    <div className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Harvest Weight</div>
-                    <div className="text-lg font-black text-emerald-400 mt-1">
-                      {baselineResult.yield.expectedWeight}g
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
-                    <div className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Harvest Day</div>
-                    <div className="text-lg font-black text-emerald-400 mt-1">
-                      Day {baselineResult.harvestDay}
-                    </div>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
-                    <div className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">Health Score</div>
-                    <div className="text-lg font-black text-emerald-400 mt-1">
-                      {baselineResult.healthScore}%
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  variant="primary"
-                  size="sm"
-                  onClick={() => { setTemp(22.0); setHumidity(65); setEc(2.2); setPh(6.2); }}
-                  icon={Zap}
-                  className="w-full justify-center text-xs font-bold"
-                >
-                  Apply AI Optimization Recipe (22.0°C / 65% / 2.2 EC / 6.2 pH)
-                </Button>
-              </div>
-
-            </div>
-          </Card>
-
-          {/* High Visibility 30-Day Growth Curve Chart Container */}
-          <Card padding="p-6 sm:p-8" header="Projected 30-Day Crop Growth Curve" subtitle="Baseline vs Simulated Environmental Trajectory">
+          {/* Projected 30-Day Crop Growth Curve Chart Container */}
+          <Card padding="p-6 sm:p-7" header="Projected 30-Day Crop Growth Curve" subtitle="Baseline vs Simulated Environmental Trajectory">
             
             <div className="h-64 flex items-end justify-between gap-2.5 pt-10 pb-4 px-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40 rounded-xl">
               {chartDays.map((day) => {
@@ -736,24 +615,170 @@ export default function SimulationLab() {
             </div>
           </Card>
 
-          {/* AI Simulation Insights Section */}
-          <Card padding="p-6 sm:p-8" header="AI Simulation Insights & Biological Drivers">
-            <div className="space-y-4 text-sm">
+          {/* AI Optimization Comparison Section */}
+          <Card padding="p-6 sm:p-7" header="AI Optimization Comparison" subtitle="Before Optimization vs AI Optimized Environmental Trajectory">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
+              
+              {/* Current Environment (Before Optimization) */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                <div className="flex justify-between items-center pb-2.5 border-b border-slate-200 dark:border-slate-800">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-400">Current Simulation</span>
+                    <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">Current Environment</h4>
+                  </div>
+                  <Badge variant="outline" className="px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                    Before Opt
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
+                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Harvest Weight</div>
+                    <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                      {simResult.yield.expectedWeight}g
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
+                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Harvest Day</div>
+                    <div className="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                      Day {simResult.harvestDay}
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800">
+                    <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Health Score</div>
+                    <div className="text-base font-black text-amber-500 mt-0.5">
+                      {simResult.healthScore}%
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* AI Optimized */}
+              <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/30 shadow-lg space-y-3">
+                <div className="flex justify-between items-center pb-2.5 border-b border-emerald-900/40">
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-300" /> Recommendation
+                    </span>
+                    <h4 className="text-sm font-extrabold text-white">AI Optimized</h4>
+                  </div>
+                  <Badge variant="brand" className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                    Peak Performance
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
+                    <div className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Harvest Weight</div>
+                    <div className="text-base font-black text-emerald-400 mt-0.5">
+                      {baselineResult.yield.expectedWeight}g
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
+                    <div className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Harvest Day</div>
+                    <div className="text-base font-black text-emerald-400 mt-0.5">
+                      Day {baselineResult.harvestDay}
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 rounded-xl bg-emerald-950/40 border border-emerald-800/40">
+                    <div className="text-[9px] font-bold text-emerald-300 uppercase tracking-wider">Health Score</div>
+                    <div className="text-base font-black text-emerald-400 mt-0.5">
+                      {baselineResult.healthScore}%
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => { setTemp(22.0); setHumidity(65); setEc(2.2); setPh(6.2); }}
+                  icon={Zap}
+                  className="w-full justify-center text-xs font-bold py-1.5"
+                >
+                  Apply AI Recipe (22.0°C / 65% / 2.2 EC / 6.2 pH)
+                </Button>
+              </div>
+
+            </div>
+          </Card>
+
+        </div>
+
+      </div>
+
+      {/* Row 3: Growth Stage Timeline & AI Simulation Insights (Side-by-Side) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        {/* Growth Stage Timeline (5 cols) */}
+        <div className="lg:col-span-5">
+          <Card padding="p-6 sm:p-7" header="Growth Stage Timeline" subtitle="Phenological stage mapping across 30 days">
+            <div className="grid grid-cols-2 gap-3 items-stretch">
+              {stages.map((stage) => {
+                const isActive = currentStage.id === stage.id;
+                return (
+                  <button
+                    key={stage.id}
+                    onClick={() => setCurrentDay(stage.start === 1 ? 4 : stage.start === 8 ? 14 : stage.start === 21 ? 24 : 29)}
+                    className={`p-3.5 rounded-2xl text-left border transition-all flex flex-col justify-between cursor-pointer ${
+                      isActive
+                        ? 'border-emerald-500 bg-emerald-500/10 shadow-lg shadow-emerald-500/10 ring-2 ring-emerald-500/30 scale-102'
+                        : 'border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className={`text-[10px] font-black uppercase tracking-wider ${
+                          isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'
+                        }`}>
+                          Stage {stage.id === 'seedling' ? '1' : stage.id === 'vegetative' ? '2' : stage.id === 'maturity' ? '3' : '4'}
+                        </span>
+                        {isActive && (
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        )}
+                      </div>
+                      <div className="font-extrabold text-sm text-slate-900 dark:text-white">
+                        {stage.name}
+                      </div>
+                      <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                        {stage.range}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-[10px]">
+                      <span className={isActive ? 'font-bold text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}>
+                        {isActive ? 'Active Stage' : 'Select Stage'}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </Card>
+        </div>
+
+        {/* AI Simulation Insights & Biological Drivers (7 cols) */}
+        <div className="lg:col-span-7">
+          <Card padding="p-6 sm:p-7" header="AI Simulation Insights & Biological Drivers" subtitle="Real-time environmental diagnostic alerts & actions">
+            <div className="space-y-3 text-sm">
               {recommendations.map((rec, idx) => {
                 const isWarning = rec.type === 'warning';
                 return (
-                  <div key={idx} className={`p-4 rounded-xl border flex items-start gap-3 ${
+                  <div key={idx} className={`p-3.5 rounded-xl border flex items-start gap-3 ${
                     isWarning
                       ? 'border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20'
                       : 'border-emerald-100 dark:border-emerald-950 bg-emerald-50/50 dark:bg-emerald-950/20'
                   }`}>
                     {isWarning ? (
-                      <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                      <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                     ) : (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                     )}
                     <div>
-                      <div className="font-bold text-slate-900 dark:text-white">{rec.title}</div>
+                      <div className="font-bold text-xs sm:text-sm text-slate-900 dark:text-white">{rec.title}</div>
                       <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5 leading-relaxed">
                         {rec.message}
                       </p>
@@ -763,7 +788,6 @@ export default function SimulationLab() {
               })}
             </div>
           </Card>
-
         </div>
 
       </div>

@@ -39,6 +39,28 @@ function Navbar() {
                 Home
               </Link>
               <Link
+                to="/dashboard"
+                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
+                  isActive('/dashboard')
+                    ? 'text-emerald-400 bg-emerald-500/5'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </Link>
+              <Link
+                to="/plant-doctor"
+                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
+                  isActive('/plant-doctor')
+                    ? 'text-emerald-400 bg-emerald-500/5'
+                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <Camera className="h-4 w-4" />
+                Plant Doctor
+              </Link>
+              <Link
                 to="/prediction"
                 className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
                   isActive('/prediction')
@@ -46,163 +68,31 @@ function Navbar() {
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
                 }`}
               >
-                <LayoutDashboard className="h-4 w-4" />
-                Prediction Dashboard
+                <Sparkles className="h-4 w-4" />
+                Yield Predictor
               </Link>
               <Link
-                to="/assistant"
+                to="/simulation"
                 className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/assistant')
+                  isActive('/simulation') || isActive('/digital-twin')
                     ? 'text-emerald-400 bg-emerald-500/5'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
                 }`}
               >
-                <Bot className="h-4 w-4" />
-                Ask Assistant
-              </Link>
-              <Link
-                to="/analytics"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/analytics')
-                    ? 'text-emerald-400 bg-emerald-500/5'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <TrendingUp className="h-4 w-4 animate-pulse" />
-                Analytics
-              </Link>
-              <Link
-                to="/iot"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/iot')
-                    ? 'text-emerald-400 bg-emerald-500/5'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Cpu className="h-4 w-4 text-emerald-400" />
-                IoT Monitoring
-              </Link>
-              <Link
-                to="/automation"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/automation')
-                    ? 'text-emerald-400 bg-emerald-500/5'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Sliders className="h-4 w-4 text-emerald-400" />
-                Automation
-              </Link>
-              <Link
-                to="/plant-health"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/plant-health')
-                    ? 'text-emerald-400 bg-emerald-500/5'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Camera className="h-4 w-4 text-emerald-400" />
-                Plant Health
-              </Link>
-              <Link
-                to="/digital-twin"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/digital-twin')
-                    ? 'text-emerald-400 bg-emerald-500/5'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Cpu className="h-4 w-4 text-emerald-450 animate-pulse" />
+                <Cpu className="h-4 w-4" />
                 Digital Twin
               </Link>
               <Link
-                to="/copilot"
+                to="/history/predictions"
                 className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/copilot')
-                    ? 'text-emerald-400 bg-emerald-500/5 font-extrabold'
+                  isActive('/history/predictions') || isActive('/history')
+                    ? 'text-emerald-400 bg-emerald-500/5'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
                 }`}
               >
-                <Bot className="h-4 w-4 text-emerald-400 animate-pulse" />
-                AI Copilot
+                <History className="h-4 w-4" />
+                Scan History
               </Link>
-              <Link
-                to="/ml-center"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/ml-center')
-                    ? 'text-emerald-400 bg-emerald-500/5 font-extrabold'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Cpu className="h-4 w-4 text-emerald-400" />
-                ML Center
-              </Link>
-              <Link
-                to="/cloud"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/cloud')
-                    ? 'text-emerald-400 bg-emerald-500/5 font-extrabold'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Cloud className="h-4 w-4 text-emerald-400" />
-                Cloud Ops
-              </Link>
-              <Link
-                to="/farms"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/farms')
-                    ? 'text-emerald-400 bg-emerald-500/5 font-extrabold'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Building className="h-4 w-4 text-emerald-400" />
-                Farms SaaS
-              </Link>
-              <Link
-                to="/marketplace"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/marketplace')
-                    ? 'text-emerald-400 bg-emerald-500/5 font-extrabold'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                Marketplace
-              </Link>
-              <Link
-                to="/community"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/community')
-                    ? 'text-emerald-400 bg-emerald-500/5 font-extrabold'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                Community
-              </Link>
-              <Link
-                to="/intelligence"
-                className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                  isActive('/intelligence')
-                    ? 'text-emerald-400 bg-emerald-500/5 font-extrabold'
-                    : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                }`}
-              >
-                <Brain className="h-4 w-4 text-emerald-400" />
-                Intelligence
-              </Link>
-              {isAuthenticated && (
-                <Link
-                  to="/history/predictions"
-                  className={`px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-all ${
-                    isActive('/history/predictions')
-                      ? 'text-emerald-400 bg-emerald-500/5'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-800/50'
-                  }`}
-                >
-                  <History className="h-4 w-4" />
-                  Prediction Logs
-                </Link>
-              )}
             </div>
           </div>
  

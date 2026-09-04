@@ -36,7 +36,7 @@ app.add_middleware(
         "http://127.0.0.1:3000",
         "https://hydro-grow-ai.vercel.app",
     ],
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -70,8 +70,10 @@ async def validation_exception_handler(request, exc):
 @app.get("/health", summary="Production System Health Check")
 def get_health_check():
     return {
-        "status": "ok",
-        "service": "HydroGrow AI Backend"
+        "status": "healthy",
+        "service": "HydroGrow AI Backend",
+        "database": "connected",
+        "version": "1.0"
     }
 
 # Include routers

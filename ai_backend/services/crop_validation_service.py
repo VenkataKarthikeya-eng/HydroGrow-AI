@@ -25,10 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = BASE_DIR.parent
 
 candidates = [
-    Path("/app/ml_models/crop_validator_model.keras"),
+    PROJECT_ROOT / "ml_models" / "crop_validator_model.pth",
+    PROJECT_ROOT.parent / "backend" / "ml_models" / "crop_validator_model.pth",
+    PROJECT_ROOT.parent / "ml" / "models" / "crop_validator_model.pth",
     PROJECT_ROOT / "ml_models" / "crop_validator_model.keras",
+    PROJECT_ROOT.parent / "backend" / "ml_models" / "crop_validator_model.keras",
     PROJECT_ROOT.parent / "ml" / "models" / "crop_validator_model.keras",
-    PROJECT_ROOT / "ml" / "models" / "crop_validator_model.keras",
 ]
 MODEL_PATH = candidates[0]
 for cand in candidates:
@@ -57,21 +59,24 @@ class CropValidationService:
     def _load_model(self):
         if self.model_path.exists():
             try:
-                if HAS_TF:
-                    self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
-                    print("[Model Loader]\nCrop Validation Model Loaded [OK]")
-                elif HAS_KERAS:
+                if HAS_KERAS:
                     self.model = keras.models.load_model(str(self.model_path), compile=False)
-                    print("[Model Loader]\nCrop Validation Model Loaded [OK]")
+                    print(f"[Model Loader] Crop Validation Model loaded successfully from '{self.model_path}' [OK]")
+                elif HAS_TF:
+                    self.model = tf.keras.models.load_model(str(self.model_path), compile=False)
+                    print(f"[Model Loader] Crop Validation Model loaded successfully from '{self.model_path}' [OK]")
                 else:
-                    print(f"[CropValidationService] Neither TensorFlow nor Keras is available to load {self.model_path}")
+                    print(f"[Model Loader] Crop Validation Model loading FAILED: Neither Keras nor TensorFlow available to load '{self.model_path}'. Fallback mode active.")
                     self.model = None
             except Exception as e:
-                print(f"[CropValidationService] Error loading crop model: {e}")
+                print(f"[Model Loader] Crop Validation Model loading FAILED from '{self.model_path}': {e}. Fallback mode active.")
                 self.model = None
+        else:
+            print(f"[Model Loader] Crop Validation Model file NOT FOUND at '{self.model_path}'. Fallback mode active.")
+            self.model = None
 
     def warm_up(self):
-        """Warm up TensorFlow model execution graph during startup."""
+        """Warm up TensorFlow/Keras model execution graph during startup."""
         if self.model is not None:
             try:
                 dummy = np.zeros((1, 224, 224, 3), dtype=np.float32)
@@ -85,12 +90,12 @@ class CropValidationService:
                 image = Image.open(io.BytesIO(image_input)).convert('RGB')
             except Exception as e:
                 print(f"[CropValidation] Error reading image bytes: {e}")
-                print("[CropValidation]\nPrediction: rejected\nClass: non_leaf\nConfidence: 0.99")
                 return {
                     "status": "rejected",
                     "reason": "Invalid image format. Please upload a valid lettuce leaf photo.",
                     "class": "non_leaf",
-                    "confidence": 0.99
+                    "confidence": 0.99,
+                    "prediction_source": "validation_error"
                 }
         elif isinstance(image_input, Image.Image):
             image = image_input
@@ -99,7 +104,8 @@ class CropValidationService:
                 "status": "rejected",
                 "reason": "Invalid image payload.",
                 "class": "non_leaf",
-                "confidence": 0.99
+                "confidence": 0.99,
+                "prediction_source": "validation_error"
             }
 
         img_arr = np.array(image.resize((100, 100)), dtype=float)
@@ -112,6 +118,8 @@ class CropValidationService:
         plant_ratio = float(np.mean(plant_foliage_mask))
         
         is_grayscale = float(np.mean(np.abs(r - g) + np.abs(g - b))) < 15.0
+
+        prediction_source = "ml_model"
 
         if self.model is not None:
             try:
@@ -138,8 +146,6 @@ class CropValidationService:
                 predicted_class = CLASS_NAMES[pred_idx]
                 confidence = raw_confidence
 
-                # Foliage & crop identity guard rules:
-                # Reject non-leaves or non-lettuce based on color features, but do NOT override model class when green_ratio >= 0.06
                 if is_grayscale or plant_ratio < 0.005:
                     predicted_class = 'non_leaf'
                     confidence = max(raw_confidence, 0.96)
@@ -151,28 +157,26 @@ class CropValidationService:
 
                 mapping = {CLASS_NAMES[i]: round(float(probs[i]), 4) for i in range(min(len(CLASS_NAMES), len(probs)))}
                 print(f"[CropValidation] Model prediction probabilities: {probs.tolist()}")
-                print(f"[CropValidation] Class labels: {CLASS_NAMES}")
-                print(f"[CropValidation] Prediction mapping: {mapping}")
-                print(f"[CropValidation] Predicted class: {predicted_class}, confidence score: {confidence:.4f}")
+                print(f"[CropValidation] Predicted class: {predicted_class}, confidence: {confidence:.4f}")
             except Exception as ex:
                 print(f"[CropValidation] Model inference failed: {ex}. Using computer vision fallback.")
                 predicted_class, confidence = self._cv_fallback(is_grayscale, plant_ratio, green_ratio)
+                prediction_source = "fallback"
         else:
+            print("[CropValidation] Model unavailable. Fallback mode active (OpenCV color heuristics).")
             predicted_class, confidence = self._cv_fallback(is_grayscale, plant_ratio, green_ratio)
-
-        # Temporary Debug Logging as required by Bug 6
-        print(f"[Crop Validation Debug] predicted_class={predicted_class}, confidence={confidence:.4f}, green_ratio={green_ratio:.4f}, foliage_ratio={plant_ratio:.4f}")
+            prediction_source = "fallback"
 
         confidence = round(confidence, 2)
 
-        # Decision Logic & Rejection Guard Rules
         if predicted_class == 'lettuce_leaf':
             if confidence >= CONFIDENCE_THRESHOLD:
                 status = "allowed"
                 result = {
                     "status": "allowed",
                     "class": "lettuce_leaf",
-                    "confidence": confidence
+                    "confidence": confidence,
+                    "prediction_source": prediction_source
                 }
             else:
                 status = "rejected"
@@ -180,7 +184,8 @@ class CropValidationService:
                     "status": "rejected",
                     "reason": "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image.",
                     "class": "lettuce_leaf",
-                    "confidence": confidence
+                    "confidence": confidence,
+                    "prediction_source": prediction_source
                 }
         elif predicted_class == 'other_plant_leaf':
             status = "rejected"
@@ -188,7 +193,8 @@ class CropValidationService:
                 "status": "rejected",
                 "reason": "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image.",
                 "class": "other_plant_leaf",
-                "confidence": confidence
+                "confidence": confidence,
+                "prediction_source": prediction_source
             }
         else:
             status = "rejected"
@@ -196,7 +202,8 @@ class CropValidationService:
                 "status": "rejected",
                 "reason": "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image.",
                 "class": "non_leaf",
-                "confidence": confidence
+                "confidence": confidence,
+                "prediction_source": prediction_source
             }
 
         print(f"[CropValidation]\nPrediction: {status}\nClass: {predicted_class}\nConfidence: {confidence}")

@@ -39,25 +39,52 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+from datetime import datetime, timezone
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    print(f"[AI Backend Global Error] {request.method} {request.url.path} - Exception: {exc}", flush=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "status": "error",
+            "detail": "An internal server error occurred while processing the request. Please try again.",
+            "error_code": "INTERNAL_SERVER_ERROR"
+        }
+    )
+
 @app.on_event("startup")
 def startup_event():
-    print("\n[Model Loader]")
-    print("Crop Validation Model Loaded [OK]")
-    print("Growth Model Loaded [OK]")
-    print("Nutrient Model Loaded [OK]")
+    print("\n==================================================")
+    print("[HydroGrow AI Plant Doctor Backend Startup]")
+    if crop_validation_service.model is not None:
+        print("[Model Loader] Crop Validation Model Loaded [OK]")
+    else:
+        print("[Model Loader] Crop Validation Model Loading FAILED - Fallback Active")
+
+    if growth_service.model is not None:
+        print("[Model Loader] Growth Model Loaded [OK]")
+    else:
+        print("[Model Loader] Growth Model Loading FAILED - Fallback Active")
+
+    if nutrient_service.model is not None:
+        print("[Model Loader] Nutrient Model Loaded [OK]")
+    else:
+        print("[Model Loader] Nutrient Model Loading FAILED - Fallback Active")
+
     try:
         crop_validation_service.warm_up()
         growth_service.warm_up()
         nutrient_service.warm_up()
     except Exception as e:
         print(f"[Model Loader] Startup warm-up warning: {e}")
-    print("Models initialized once\n")
+    print("==================================================\n")
 
 
 @app.get("/health", summary="Health check endpoint")
@@ -164,7 +191,7 @@ async def analyze_plant_combined(
         print(f"[Stage 1 Error] Image decode failed: {e}")
         raise HTTPException(status_code=400, detail=f"Corrupted or invalid image file: {str(e)}")
     t_stage1 = time.perf_counter() - t_stage1_start
-    print(f"✓ Stage 1: Image Upload & Decode Time: {t_stage1:.4f}s")
+    print(f"[OK] Stage 1: Image Upload & Decode Time: {t_stage1:.4f}s")
 
     # Stage 2: Crop Identity Validation Security Gate
     t_stage2_start = time.perf_counter()
@@ -174,13 +201,26 @@ async def analyze_plant_combined(
         print(f"[Stage 2 Warning] Crop validation error, passing: {e}")
         val_check = {"status": "accepted", "confidence": 0.95}
     t_stage2 = time.perf_counter() - t_stage2_start
-    print(f"✓ Stage 2: Crop Validation Time: {t_stage2:.4f}s")
+    print(f"[OK] Stage 2: Crop Validation Time: {t_stage2:.4f}s")
+
+    now_iso = datetime.now(timezone.utc).isoformat()
 
     if val_check.get("status") == "rejected":
         print(f"[Stage 2 Rejected] {val_check.get('reason')}")
         return JSONResponse(
             status_code=400,
-            content=val_check
+            content={
+                "status": "rejected",
+                "reason": val_check.get("reason", "Uploaded image does not appear to be lettuce. Please upload a valid hydroponic lettuce leaf image."),
+                "crop_validation": {
+                    "status": "rejected",
+                    "class": val_check.get("class", "non_leaf"),
+                    "confidence": val_check.get("confidence", 0.96)
+                },
+                "prediction_source": val_check.get("prediction_source", "ml_model"),
+                "confidence": val_check.get("confidence", 0.96),
+                "timestamp": now_iso
+            }
         )
 
     # Stage 3: Growth Stage Prediction (Protected with 10s timeout)
@@ -191,25 +231,25 @@ async def analyze_plant_combined(
             future_growth = executor.submit(growth_service.predict_image_fast, image, batch_arr)
             growth_res, _ = future_growth.result(timeout=10.0)
     except concurrent.futures.TimeoutError:
-        print("[Stage 3 Timeout] Growth stage prediction exceeded 10s. Utilizing computer vision fallback.")
-        stage_name, day_num, conf_val = growth_service._cv_fallback(image)
+        print("[Stage 3 Warning] Growth prediction timed out after 10s. Using fallback.")
         growth_res = {
-            "growth_stage": stage_name,
-            "growth_day": day_num,
-            "confidence": round(conf_val, 2),
-            "recommendation": "Maintain standard nutrient schedule for target growth phase."
+            "growth_stage": "Vegetative",
+            "growth_day": 15,
+            "confidence": 0.85,
+            "recommendation": "Maintain standard fertigation schedule for target growth phase.",
+            "prediction_source": "fallback"
         }
     except Exception as e:
-        print(f"[Stage 3 Error] Growth prediction failed: {e}. Utilizing fallback.")
-        stage_name, day_num, conf_val = growth_service._cv_fallback(image)
+        print(f"[Stage 3 Error] Growth prediction failed: {e}. Using fallback.")
         growth_res = {
-            "growth_stage": stage_name,
-            "growth_day": day_num,
-            "confidence": round(conf_val, 2),
-            "recommendation": "Maintain standard nutrient schedule for target growth phase."
+            "growth_stage": "Vegetative",
+            "growth_day": 15,
+            "confidence": 0.85,
+            "recommendation": "Maintain standard nutrient schedule for target growth phase.",
+            "prediction_source": "fallback"
         }
     t_stage3 = time.perf_counter() - t_stage3_start
-    print(f"✓ Stage 3: Growth Stage Prediction Time: {t_stage3:.4f}s (Stage: {growth_res.get('growth_stage')}, Day {growth_res.get('growth_day')})")
+    print(f"[OK] Stage 3: Growth Stage Prediction Time: {t_stage3:.4f}s (Stage: {growth_res.get('growth_stage')}, Day {growth_res.get('growth_day')})")
 
     # Stage 4: Nutrient Deficiency Prediction (Protected with 10s timeout)
     t_stage4_start = time.perf_counter()
@@ -219,27 +259,23 @@ async def analyze_plant_combined(
             future_nutrient = executor.submit(nutrient_service.predict_image_fast, image, batch_arr)
             nutrient_res, _ = future_nutrient.result(timeout=10.0)
     except concurrent.futures.TimeoutError:
-        print("[Stage 4 Timeout] Nutrient deficiency prediction exceeded 10s. Utilizing computer vision fallback.")
-        raw_cond, conf_val = nutrient_service._cv_fallback(image)
-        disp_cond = nutrient_service.CONDITION_DISPLAY_NAMES.get(raw_cond, raw_cond)
-        rec_text = nutrient_service.RECOMMENDATIONS.get(raw_cond, "Maintain current nutrient schedule.")
+        print("[Stage 4 Warning] Nutrient prediction timed out after 10s. Using fallback.")
         nutrient_res = {
-            "condition": disp_cond,
-            "confidence": round(conf_val, 2),
-            "recommendation": rec_text
+            "condition": "Healthy",
+            "confidence": 0.85,
+            "recommendation": "Maintain current nutrient solution parameters.",
+            "prediction_source": "fallback"
         }
     except Exception as e:
-        print(f"[Stage 4 Error] Nutrient prediction failed: {e}. Utilizing fallback.")
-        raw_cond, conf_val = nutrient_service._cv_fallback(image)
-        disp_cond = nutrient_service.CONDITION_DISPLAY_NAMES.get(raw_cond, raw_cond)
-        rec_text = nutrient_service.RECOMMENDATIONS.get(raw_cond, "Maintain current nutrient schedule.")
+        print(f"[Stage 4 Error] Nutrient prediction failed: {e}. Using fallback.")
         nutrient_res = {
-            "condition": disp_cond,
-            "confidence": round(conf_val, 2),
-            "recommendation": rec_text
+            "condition": "Healthy",
+            "confidence": 0.85,
+            "recommendation": "Maintain current nutrient solution parameters.",
+            "prediction_source": "fallback"
         }
     t_stage4 = time.perf_counter() - t_stage4_start
-    print(f"✓ Stage 4: Nutrient Deficiency Prediction Time: {t_stage4:.4f}s (Condition: {nutrient_res.get('condition')})")
+    print(f"[OK] Stage 4: Nutrient Deficiency Prediction Time: {t_stage4:.4f}s (Condition: {nutrient_res.get('condition')})")
 
     # Stage 5: Agronomist Advice Generation (Protected with 10s timeout & fallback)
     t_stage5_start = time.perf_counter()
@@ -266,11 +302,20 @@ async def analyze_plant_combined(
             f"Maintain EC between 1.8–2.2 mS/cm, water pH between 5.8–6.2, and solution temperature under 22°C."
         )
     t_stage5 = time.perf_counter() - t_stage5_start
-    print(f"✓ Stage 5: Agronomist Advice Generation Time: {t_stage5:.4f}s")
+    print(f"[OK] Stage 5: Agronomist Advice Generation Time: {t_stage5:.4f}s")
 
     # Stage 6: Final Response Creation
     t_stage6_start = time.perf_counter()
+    pred_source = growth_res.get("prediction_source") or nutrient_res.get("prediction_source") or "ml_model"
+    overall_conf = round(float(growth_res.get("confidence", 0.95)), 2)
+
     response_payload = {
+        "status": "success",
+        "crop_validation": {
+            "status": val_check.get("status", "allowed"),
+            "class": val_check.get("class", "lettuce_leaf"),
+            "confidence": val_check.get("confidence", 0.95)
+        },
         "growth_prediction": {
             "stage": growth_res.get("growth_stage"),
             "growth_day": growth_res.get("growth_day"),
@@ -280,13 +325,15 @@ async def analyze_plant_combined(
             "condition": nutrient_res.get("condition"),
             "confidence": nutrient_res.get("confidence")
         },
-        "recommendation": overall_rec
+        "recommendation": overall_rec,
+        "prediction_source": pred_source,
+        "confidence": overall_conf,
+        "timestamp": now_iso
     }
     t_stage6 = time.perf_counter() - t_stage6_start
     t_total = time.perf_counter() - t_pipeline_start
-    print(f"✓ Stage 6: Final Response Creation Time: {t_stage6:.4f}s")
-    print(f"🏁 Total Pipeline Execution Time: {t_total:.4f}s")
+    print(f"[OK] Stage 6: Final Response Creation Time: {t_stage6:.4f}s")
+    print(f"[DONE] Total Pipeline Execution Time: {t_total:.4f}s")
     print("==================================================\n")
 
     return response_payload
-

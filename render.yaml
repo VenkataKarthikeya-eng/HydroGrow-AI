@@ -1,0 +1,59 @@
+# HydroGrow AI — Render.com Blueprint Deployment Specification
+# Docs: https://render.com/docs/blueprint-spec
+
+services:
+  # 1. Core Application Backend API (FastAPI + SQLite + Tabular ML)
+  - type: web
+    name: hydrogrow-core-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.api.main:app --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PYTHONPATH
+        value: .
+      - key: PORT
+        value: 10000
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENVIRONMENT
+        value: production
+
+  # 2. AI Vision & Plant Doctor Microservice (FastAPI + PyTorch)
+  - type: web
+    name: hydrogrow-ai-backend
+    env: python
+    rootDir: ai_backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port 10001
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: PORT
+        value: 10001
+      - key: ENVIRONMENT
+        value: production
+
+  # 3. React 18 + Vite Frontend (Static Site)
+  - type: web
+    name: hydrogrow-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: hydrogrow-core-backend
+          property: host
+      - key: VITE_AI_API_URL
+        fromService:
+          type: web
+          name: hydrogrow-ai-backend
+          property: host

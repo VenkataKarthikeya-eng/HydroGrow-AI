@@ -35,31 +35,54 @@ class LeafValidationService:
         self._load_model()
 
     def _load_model(self):
-        if HAS_TORCH and os.path.exists(self.model_path):
+        if os.path.exists(self.model_path):
             try:
-                checkpoint = torch.load(self.model_path, map_location=self.device)
-                
-                weights = models.MobileNet_V3_Small_Weights.DEFAULT
-                backbone = models.mobilenet_v3_small(weights=None)
-                in_features = backbone.classifier[0].in_features
-                backbone.classifier = torch.nn.Sequential(
-                    torch.nn.Linear(in_features, 128),
-                    torch.nn.Hardswish(),
-                    torch.nn.Dropout(p=0.2),
-                    torch.nn.Linear(128, 2)
-                )
+                import keras
+                self.model = keras.models.load_model(self.model_path, compile=False)
+                self.model_type = 'keras'
+                print(f"[LeafValidationService] Loaded leaf validation model (Keras 3) from '{self.model_path}' successfully [OK].")
+                return
+            except Exception:
+                pass
 
-                self.model = backbone.to(self.device)
-                if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-                    self.model.load_state_dict(checkpoint['model_state_dict'])
-                self.model.eval()
-                print(f"[LeafValidationService] Loaded leaf validation model from '{self.model_path}' successfully.")
-            except Exception as e:
-                print(f"[LeafValidationService] Error loading leaf validator model: {e}")
-                self.model = None
+            try:
+                import tensorflow as tf
+                self.model = tf.keras.models.load_model(self.model_path, compile=False)
+                self.model_type = 'keras'
+                print(f"[LeafValidationService] Loaded leaf validation model (TensorFlow) from '{self.model_path}' successfully [OK].")
+                return
+            except Exception:
+                pass
+
+            if HAS_TORCH:
+                try:
+                    checkpoint = torch.load(self.model_path, map_location=self.device)
+                    
+                    weights = models.MobileNet_V3_Small_Weights.DEFAULT
+                    backbone = models.mobilenet_v3_small(weights=None)
+                    in_features = backbone.classifier[0].in_features
+                    backbone.classifier = torch.nn.Sequential(
+                        torch.nn.Linear(in_features, 128),
+                        torch.nn.Hardswish(),
+                        torch.nn.Dropout(p=0.2),
+                        torch.nn.Linear(128, 2)
+                    )
+
+                    self.model = backbone.to(self.device)
+                    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
+                        self.model.load_state_dict(checkpoint['model_state_dict'])
+                    self.model.eval()
+                    self.model_type = 'torch'
+                    print(f"[LeafValidationService] Loaded leaf validation model (PyTorch) from '{self.model_path}' successfully [OK].")
+                    return
+                except Exception as e:
+                    print(f"[LeafValidationService] Loading FAILED from '{self.model_path}': {e}. Fallback mode active.")
+                    self.model = None
+                    self.model_type = 'fallback'
         else:
-            print(f"[LeafValidationService] Model file not found at '{self.model_path}'. Using vision fallback heuristics.")
+            print(f"[LeafValidationService] Model file not found at '{self.model_path}'. Fallback mode active.")
             self.model = None
+            self.model_type = 'fallback'
 
     def validate_image(self, image_bytes: bytes) -> dict:
         """
