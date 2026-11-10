@@ -66,3 +66,12 @@ data/crop_validator_dataset/
 .pytest_cache/
 .ipynb_checkpoints/
 
+# Research Papers, Thesis & Publication Artifacts (Do not push to GitHub)
+researchpaper/
+update_template/
+documentation_scripts/
+*.docx
+*.pptx
+*.pdf
+!docs/*.pdf
+

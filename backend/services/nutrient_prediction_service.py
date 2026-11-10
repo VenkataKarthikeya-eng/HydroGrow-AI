@@ -102,12 +102,26 @@ class NutrientPredictionService:
             if HAS_TORCH:
                 try:
                     checkpoint = torch.load(self.model_path, map_location=self.device)
-                    self.model = MobileNetV3NutrientModel(num_classes=4).to(self.device)
+                    sd = checkpoint['model_state_dict'] if (isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint) else checkpoint
                     
-                    if isinstance(checkpoint, dict) and 'model_state_dict' in checkpoint:
-                        self.model.load_state_dict(checkpoint['model_state_dict'])
-                    elif isinstance(checkpoint, dict):
-                        self.model.load_state_dict(checkpoint)
+                    has_backbone_prefix = any(k.startswith('backbone.') for k in sd.keys()) if isinstance(sd, dict) else False
+                    
+                    if has_backbone_prefix:
+                        self.model = MobileNetV3NutrientModel(num_classes=4).to(self.device)
+                        self.model.load_state_dict(sd)
+                    else:
+                        backbone = models.mobilenet_v3_small(weights=None)
+                        in_features = backbone.classifier[0].in_features
+                        out_f = sd.get('classifier.0.weight', None) if isinstance(sd, dict) else None
+                        hidden = out_f.shape[0] if out_f is not None else 128
+                        backbone.classifier = torch.nn.Sequential(
+                            torch.nn.Linear(in_features, hidden),
+                            torch.nn.Hardswish(),
+                            torch.nn.Dropout(p=0.3),
+                            torch.nn.Linear(hidden, 4)
+                        )
+                        self.model = backbone.to(self.device)
+                        self.model.load_state_dict(sd)
                         
                     self.model.eval()
                     self.model_type = 'torch'

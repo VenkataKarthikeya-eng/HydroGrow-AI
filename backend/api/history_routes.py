@@ -11,6 +11,36 @@ router = APIRouter(prefix="/api/history", tags=["History"])
 def get_prediction_history(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     return crud.get_predictions_by_user_id(db, user_id=current_user.id)
 
+@router.post("/predictions", summary="Save a prediction to grower history")
+def save_prediction_history(
+    payload: dict,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    input_params = payload.get("input_parameters") or payload.get("inputs") or {}
+    weight = float(payload.get("predicted_weight") or payload.get("predicted_yield_grams") or 0.0)
+    category = str(payload.get("growth_category") or payload.get("status") or "Optimal Growth")
+    recs = payload.get("recommendations") or []
+    expl = payload.get("explanation") or {}
+
+    pred = crud.create_prediction(
+        db=db,
+        user_id=current_user.id,
+        input_parameters=input_params,
+        predicted_weight=weight,
+        growth_category=category,
+        recommendations=recs if isinstance(recs, list) else [recs],
+        explanation=expl if isinstance(expl, dict) else {}
+    )
+    return {
+        "status": "success",
+        "id": pred.id,
+        "user_id": pred.user_id,
+        "predicted_weight": pred.predicted_weight,
+        "growth_category": pred.growth_category,
+        "created_at": pred.created_at.isoformat() if pred.created_at else None
+    }
+
 @router.get("/chats", response_model=List[schemas.ConversationResponse], summary="Retrieve grower chat conversations")
 def get_chat_history(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     return crud.get_conversations_by_user_id(db, user_id=current_user.id)
